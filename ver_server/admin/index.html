@@ -1,0 +1,209 @@
+<?php
+include $_SERVER['DOCUMENT_ROOT'].'/common/config.inc.php';
+include $_SERVER['DOCUMENT_ROOT'].'/common/dbSetting.php';
+/*
+$objfuncdb = new FUNCDB_CLASS();
+$query = "SELECT * FROM authorised_user";
+$RowNum = $objdb->sqlNumRows( $query );
+if ( $RowNum )
+{
+*/
+$name = trim($_POST['name']);
+$password = trim($_POST['password']);
+
+if($mode=='reload'){
+	$query = "SELECT id FROM authorised_user WHERE id='".$name."' AND password=sha1('".$password."blue') ";
+	$admin_id = $objdb->sqlRowOne($query);
+	if ( $admin_id ) {
+		if( $_POST[USERID_SAVE] )	setcookie( _USERID_SAVE, $_POST[name], time() + 60 * 60 * 24 * 365, "/" );
+		else						setcookie( _USERID_SAVE, "", time() + 60 * 60 * 24 * 365, "/" );
+		if( $_POST[USERPW_SAVE] )	setcookie( _USERPW_SAVE, $_POST[password], time() + 60 * 60 * 24 * 365, "/" );
+		else						setcookie( _USERPW_SAVE, "", time() + 60 * 60 * 24 * 365, "/" );
+		$_SESSION['LoginAdmin']=$admin_id;
+		$objfunc->goParent('/admin/admin/');
+	} else {
+		$objfunc->alert('정보가 일치하지 않습니다.');
+	}
+}
+?>
+<SCRIPT>
+	function chechLogin(){
+	var f = document.loginForm;
+
+	if( f.name.value == '' || f.name.value == null ) {
+		alert('input name');
+		f.name.focus();
+		return false;
+	}
+	if( f.password.value == '' || f.password.value == null ) {
+		alert('input password');
+		f.password.focus();
+		return false;
+	}
+}
+window.onload = function() {
+	var f = document.loginForm;
+	f.name.focus();
+}
+</SCRIPT>
+<link href='/common/admin.css' rel='stylesheet' type='text/css'>
+<div align='center'>
+<form method='post' action='<?= $_SERVER["PHP_SELF"] ?>' name='loginForm' target='loginFrame' onSubmit='return chechLogin()'>
+<input type='hidden' name='mode' value='reload'>
+	<?
+	$CHK_USERID_SAVE = false;
+	if( $_REQUEST[name] ) {
+		if( $_REQUEST[name] == $_USERID_SAVE ) {
+			$CHK_USERID_SAVE = true;
+		}
+		else {
+			$_USERPASS_SAVE = "";
+		}
+		$name = $_REQUEST[name];
+	}
+	else if( $_USERID_SAVE ) {
+		$name = $_USERID_SAVE;
+
+		$CHK_USERID_SAVE = true;
+	}
+	else {
+		$name = "";
+	}
+
+	$CHK_USERPW_SAVE = false;
+	if( $_REQUEST[password] ) {
+		if( $_REQUEST[password] == $_USERPW_SAVE ) {
+			$CHK_USERPW_SAVE = true;
+		}
+		else {
+			$_USERPASS_SAVE = "";
+		}
+		$password = $_REQUEST[password];
+	}
+	else if( $_USERPW_SAVE ) {
+		$password = $_USERPW_SAVE;
+
+		$CHK_USERPW_SAVE = true;
+	}
+	else {
+		$password = "";
+	}
+	?>
+
+<TABLE border=0 cellpadding=0 cellspacing=0 width="570" style="margin-top:250px;">
+<TR>
+	<TD width="100"><img src="/admin/img/log_img01.gif"></TD>
+	<TD style="background:url('/admin/img/log_img02.gif') right top no-repeat;">
+		<!-- login -->
+		<TABLE border=0 cellpadding=0 cellspacing=4 id="LOGtbl">
+		<TR>
+			<TD><img src="/admin/img/log_id.gif" hspace="8"></TD>
+			<TD><input type='text' name='name' class="box" tabindex="1" value='<?=$name?>'></TD>
+			<TD><INPUT TYPE="checkbox" NAME="USERID_SAVE" <? if( $CHK_USERID_SAVE ) echo "checked"; ?>>ID저장</TD>
+		</TR>
+		<TR>
+			<TD><img src="/admin/img/log_pw.gif" hspace="8"></TD>
+			<TD><INPUT TYPE="password" NAME="password" class="box" tabindex="2" value='<?=$password?>'></TD>
+			<TD><INPUT TYPE="checkbox" NAME="USERPW_SAVE" <? if( $CHK_USERPW_SAVE ) echo "checked"; ?>>PW저장</TD>
+		</TR>
+		</TABLE>
+		<div class="topdotline" style="width:95%;padding:10px 0 10px 60px;margin-top:10px;">
+		<input type="image" src="/img/common/btn_log_login.gif" tabindex="3" onfocus="blur();">
+		</div>
+		<!-- //btn -->
+	</TD>
+</TR>
+</TABLE>
+
+
+
+</form>
+</div>
+
+<?
+/*
+} else {
+
+	  if ( empty($host) || empty($user) || empty($pw) || empty($db_name) )
+	  { 
+*/
+?>
+<!-- 
+		<link href='/common/admin.css' rel='stylesheet' type='text/css'>
+		<div align='center'>
+		<TABLE class='admintbl'>
+			<TR>
+				<TD>데이타 베이스 정보를 입력하세요.</TD>
+			</TR>
+			<TR>
+				<TD>수정파일 : /common/dbinfo.php </TD>
+			</TR>
+		</TABLE>
+		</div>
+ -->
+<?
+/*
+	  } else {
+				$AdminId = trim($_POST[AdminId]);
+				$AdminPw = trim($_POST[AdminPw]);
+
+			if( !isset($_POST[AdminId]) && !isset($_POST[AdminPw]) ) {
+*/
+			  ?>
+<!--
+					<SCRIPT>
+						function chkForm(){
+						var f = document.firstCreate;
+
+						if( f.AdminId.value == '' || f.AdminId.value == null ) {
+							alert('input id');
+							f.AdminId.focus();
+							return false;
+						}
+						if( f.AdminPw.value == '' || f.AdminPw.value == null ) {
+							alert('input password');
+							f.AdminPw.focus();
+							return false;
+						}
+					}
+					</SCRIPT>
+			<link href='/common/admin.css' rel='stylesheet' type='text/css'>
+			  <div align='center'>
+			  <form method='post' name='firstCreate' action='<?= $_SERVER["PHP_SELF"] ?>' onSubmit='return chkForm()'>
+				<TABLE class='admintbl' cellpadding='5'>
+				  <TR align='center'>
+					<TD colspan='2' class='admintitle'>관리자 초기 세팅</TD>
+				  </TR>
+				  <TR align='center'>
+					<TD class='adminleft'>id</TD>
+					<TD class='adminwhite'>
+						<input type='text' name='AdminId' maxlength='20'></TD>
+				  </TR>
+				  <TR align='center'>
+					<TD class='adminleft'>password</TD>
+					<TD class='adminwhite'>
+						<input type='password' name='AdminPw' maxlength='20'></TD>
+				  </TR>
+				  <TR align='center'>
+					<TD colspan='2' class='adminwhite'>
+						<input type='submit' value='등록' class='but orange pad5'></TD>
+				  </TR>
+				 </TABLE>
+			  </form>
+			  </div>
+-->
+			  <?
+/*
+			  } else {
+				$objfuncdb->InstallNewDB($AdminId, $AdminPw);
+				unset($_POST[AdminId]);
+				unset($_POST[AdminPw]);
+				echo "<meta http-equiv='refresh' content=\"0;URL=/admin/\">";
+			  }
+	 
+	   }
+
+}
+*/
+?>
+<iframe name='loginFrame' width=0 height=0></iframe>
