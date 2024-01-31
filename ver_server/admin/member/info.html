@@ -1,0 +1,165 @@
+<?php
+$id = $_REQUEST['id'];
+$PageNo = $_REQUEST['PageNo'];
+$qrystring = "&PageSize=$_REQUEST[PageSize]".
+				"&search_word=$_REQUEST[search_word]".
+				"&field=$_REQUEST[field]";
+
+$sql = "SELECT * FROM member WHERE id ='".$id."'";
+$result = mysql_query($sql);
+$row = mysql_fetch_array($result);
+$query = "SELECT levelname FROM memberlevel WHERE level = '".$row[level]."'";
+$levelName = $objdb->sqlRowOne( $query );
+$levelSql = "SELECT * FROM memberlevel ORDER BY level ASC";
+$levelResult = $objdb->sqlResult( $levelSql );
+
+if( $_REQUEST[mode] == "modi" ) {
+$level = $_REQUEST[level];
+$email = $_REQUEST[email];
+$zip = $_REQUEST[zip];
+$addr1 = $_REQUEST[addr1];
+$addr2 = $_REQUEST[addr2];
+$phone = $_REQUEST[phone];
+$hp = $_REQUEST[hp];
+$letter = $_REQUEST[letter];
+
+	$sql = "UPDATE member SET email='".$email."', zip='".$zip."', addr1='".$addr1."', addr2='".$addr2."' ".
+			",phone='".$phone."', hp='".$hp."', level='".$level."', letter='".$letter."' WHERE id='".$id."'";
+	$rtn = $objdb->sqlExe( $sql );
+	$objfunc->reloadParent( "정보가 수정되었습니다" );
+}
+
+if( $_REQUEST[mode] == "updatePasswd" ) {
+	$pass = substr(md5($_REQUEST[pass]),0,20);
+	$sql = "UPDATE member SET pass = '".$pass."' WHERE id = '".$id."'";
+	$objdb->sqlExe( $sql );
+	$objfunc->reloadParent( "비밀번호가 변경되었습니다" );
+}
+?>
+
+<SCRIPT>
+function updatePasswd() {
+	var f = memInfo;
+
+	if( f.pass.value == '' ) {
+		alert( "변경할 비밀번호를 입력해 주세요" );
+		f.pass.focus();
+	}
+	else {
+		if( confirm( "정말 변경하시겠습니까?" ) ) {
+			f.mode.value = "updatePasswd";
+			f.submit();
+		}
+	}
+	return;
+}
+function go_list() {
+	self.location = "/admin/member/index.html?page=list&PageNo=<?= $PageNo ?><?= $qrystring?>";
+}
+function go_del( id ) {
+	if( !confirm( "삭제하시겠습니까?" ) ) return;
+	if( !confirm( "정말 삭제하시겠습니까?" ) ) return;
+
+	self.location = "/admin/member/delete.html?page=list&PageNo=<?= $_REQUEST[PageNo] ?>&id="+id;
+}
+</SCRIPT>
+
+<TABLE width='90%'>
+	<TR>
+		<TD class='title'>회원정보</TD>
+	</TR>
+</TABLE>
+
+<div class="dotbox">
+<ul>
+	<li>회원 비밀번호는 관리자가 확인할 수 없으며, 비밀번호 확인 요청시 본인 확인이 되면 새로운 비밀번호를 입력하신 후 <BR>[<B>비밀번호를 직접 변경</B>] 버튼을 클릭하시면 비밀번호를 변경하실 수 있습니다.</li>
+</ul>
+</div>
+
+<div align='center'>
+<TABLE class='admintbl' cellpadding='8' cellspacing='1'width='90%'>
+<form method='post' name='memInfo' target='exeFrame'>
+<input type='hidden' name='mode' value='modi'>
+	<TR>
+		<TD class='adminleft'>아이디</TD>
+		<TD class='adminwhite'><?=$row[id]?></TD>
+	</TR>
+	<TR>
+		<TD class='adminleft'>이름</TD>
+		<TD class='adminwhite'><?=$row[name]?></TD>
+	</TR>
+	<TR>
+		<TD class='adminleft'>등급</TD>
+		<TD class='adminwhite'>
+			<select name='level' class='box'>
+				<option value=''>미지정</option>
+			<? while ( $levelRow = $objdb->sqlFetch($levelResult) ) { ?>			
+				<option value='<?= $levelRow[level]?>' <?= ( $row[level] == $levelRow[level]? 'selected':'') ?>><?= $levelRow[levelname]?></option>
+			<? } ?>
+			</select>
+		</TD>
+	</TR>
+	<TR>
+		<TD class='adminleft'>비밀번호</TD>
+		<TD class='adminwhite'>
+			<input type="text" name="pass" class="box imedisabled" onKeyDown="defenseNull();defenseSubmit();">
+			<a href="javascript:updatePasswd();"><font class='sky'>[비밀번호를 직접 변경]</font></a>
+		</TD>
+	</TR>
+	<TR>
+		<TD class='adminleft'>생년월일</TD>
+		<TD class='adminwhite'>
+			<? if( $row[jumin] == '' ) {?>
+				가입시 미등록</TD>
+			<? } else { ?>
+			<?= substr($row[jumin],0,2)?>년 <?= substr($row[jumin],2,2)?>월 <?= substr($row[jumin],4,2)?>일</TD>
+			<? } ?>
+	</TR>
+	<TR>
+		<TD class='adminleft'>이메일</TD>
+		<TD class='adminwhite'>
+			<input type='text' name='email' class='box' size='40' value='<?= $row[email] ?>'>
+		</TD>
+	</TR>
+	<TR>
+		<TD class='adminleft'>주소</TD>
+		<TD class='adminwhite'>
+			<INPUT TYPE="text" NAME="zip" class="box" size='10' value='<?= $row[zip] ?>'><br>
+			<INPUT TYPE="text" NAME="addr1" class="box" size='60' value='<?= $row[addr1] ?>'><br>
+			<INPUT TYPE="text" NAME="addr2" class="box" size='60' value='<?= $row[addr2] ?>'>
+		</TD>
+	</TR>
+	<TR>
+		<TD class='adminleft'>전화번호</TD>
+		<TD class='adminwhite'>
+			<INPUT TYPE="text" NAME="phone" class="box" size='15' value='<?= $row[phone]?>'>
+		</TD>
+	</TR>
+	<TR>
+		<TD class='adminleft'>휴대폰</TD>
+		<TD class='adminwhite'>
+			<INPUT TYPE="text" NAME="hp" class="box" size='15' value='<?= $row[hp]?>'>
+		</TD>
+	</TR>
+	<TR>
+		<TD class='adminleft'>뉴스레터 수신여부</TD>
+		<TD class='adminwhite'>
+			<INPUT TYPE="radio" NAME="letter" value='y' <?= $row[letter]=='y'?'checked':''?>><font class="dgray">수신합니다.</font>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<INPUT TYPE="radio" NAME="letter" value='n' <?= $row[letter]=='n'?'checked':'' ?>>수신하지 않습니다.
+		</TD>
+	</TR>
+	<TR>
+		<TD class='adminleft'>가입일</TD>
+		<TD class='adminwhite'><?= $row[wdate]?></TD>
+	</TR>
+</TABLE>
+<TABLE>
+	<TR>
+		<TD>
+			<input type='submit' value='수정' class='but orange pad5'>
+			<input type='button' value='삭제' class='but red pad5' onClick="go_del('<?= $row[id] ?>');">
+			<input type='button' name='list' value='회원목록' class='but blue pad5' onClick='go_list();'>
+		</TD>
+	</TR>
+</form>
+</TABLE>
+</div>

@@ -1,0 +1,55 @@
+<?php
+$ca_title=addslashes($_POST['ca_title']);
+$ca_comment=addslashes($_POST['ca_comment']);
+$ca_code = $_GET['ca_code'];
+$mode = $_GET['mode'];
+$ca_step = $_REQUEST['ca_step'];
+$ca_group = $_REQUEST['ca_group'];
+$ca_parent = $_REQUEST['ca_parent'];
+
+if ( !$mode ) { 
+	$dbsql = "INSERT INTO category VALUES (NULL,'$ca_title','$ca_comment',0,0,0,0)";
+	$ret = mysql_query($dbsql);
+	if( !$ret ) {
+		echo "최상위 카테고리 생성 실패"; 
+		echo mysql_error();
+	}
+	$ca_code = mysql_insert_id();
+	$dbsql = "UPDATE category SET ca_group=$ca_code WHERE ca_code=$ca_code";
+	mysql_query($dbsql);
+	mysql_close();
+	$objfunc->goUrl('/admin/good/index.html?page=cate');
+
+} else if ($mode=="reply") {
+	$sql = "SELECT ca_group,ca_step,ca_top FROM category WHERE ca_code='".$ca_code."'";
+	$result=mysql_query( $sql );
+	$row=mysql_fetch_array($result);
+	if ( $row[ca_step] == 2 ){
+		$objfunc->alert('하부메뉴 생성불가', false);
+		$objfunc->goUrl('/admin/good/index.html?page=cate');
+	} else {
+		$ca_step=$row[ca_step]+1;
+		$ca_top2=$row[ca_top]+1;
+
+		$dbsql = "UPDATE category SET ca_top=ca_top+1 WHERE (ca_group=$row[ca_group] AND ca_top>$row[ca_top])";
+		mysql_query($dbsql);
+		$dbsql = "INSERT INTO category VALUES (NULL,'$ca_title','$ca_comment',$row[ca_group],$ca_step,$ca_top2,$ca_code)";
+		if( mysql_query($dbsql) == false )
+			echo "하부카테고리 생성 실패";
+		mysql_close();	
+		$objfunc->goUrl('/admin/good/index.html?page=cate');
+	}
+
+} else if ( $mode=="modify" ) {
+	$result = "UPDATE category SET ca_title='$ca_title',ca_comment='$ca_comment' WHERE ca_code=$ca_code ";
+	mysql_query($result);
+	mysql_close();	
+	$objfunc->goUrl("/admin/good/index.html?page=cateread&ca_code=$ca_code&ca_step=$ca_step&ca_group=$ca_group&ca_parent=$ca_parent&mode=");
+
+} else if ( $mode=="del" ) {
+	$result = "DELETE FROM category WHERE ca_code=$ca_code ";
+	mysql_query($result);
+	mysql_close();	
+	$objfunc->goUrl('/admin/good/index.html?page=cate');
+}
+?>

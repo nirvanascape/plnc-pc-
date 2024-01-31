@@ -1,0 +1,60 @@
+<?php
+include $_SERVER["DOCUMENT_ROOT"]."/config/etc_added.conf.php";
+
+if( $_POST[mode] == "reload" ){
+	$filename = $_SERVER["DOCUMENT_ROOT"]."/config/etc_added.conf.php";
+	$config_file = phpcode_str(
+	'ETC_ADDED1', 'ETC_ADDED2', 'ETC_ADDED3', 'ETC_ADDED4', 'ETC_ADDED5', 'ETC_ADDED6', 'ETC_ADDED7', 'ETC_ADDED8', 'ETC_ADDED9', 'ETC_ADDED10'
+	);
+	$objfile->fileWrite( $filename, $config_file );
+	updateConfig( "etc_added.conf.php", $config_file );
+
+	$objfunc->reloadParent();
+}
+?>
+<form name="etcaddedForm" method="post" enctype="multipart/form-data" target="exeFrame">
+<TABLE width='100%' align='center'>
+	<TR>
+		<TD class='title'>상품관련 설정</TD>
+	</TR>
+</TABLE>
+
+<div class="dotbox">
+<ul>
+	<li>상품 상세페이지에서 보여질 항목의 이름을 설정합니다. (예: 상품명,모델명,스펙...)</li>
+	<li>상품 등록시 "사용할 항목명"이 입력된 항목만 등록하실 수 있습니다.</li>
+</ul>
+</div>
+
+<TABLE width='90%' class='admintbl' cellpadding='5' align='center'>
+<TR>
+	<TD width='100' class='adminleft'>상세페이지<br>항목별 관리</TD>
+	<TD class='adminwhite'>
+	
+	<TABLE width='90%' class='admintbl' cellpadding='5' align='center'>
+		<TR class='admintitle'>
+			<TD></TD>
+			<TD>사용할 항목명</TD>
+		</TR>
+<?for($i=1; $i<=10; $i++){?>
+		<TR class='adminwhite' align='center'>
+			<TD>추가항목<?=$i?></TD>
+			<TD>
+				<input type='text' class='box' name="ETC_ADDED<?=$i?>" value="<?=$objfunc->htmlText(${_ETC_ADDED.$i})?>">
+			</TD>
+		</TR>
+<?}?>
+	</TABLE>
+	
+	</TD>
+</TR>
+</TABLE>
+<TABLE width='90%' align='center'>
+	<TR align='center'>
+		<TD>
+			<input type="submit"value="확인" class='but pad5 blue'>
+		</TD>
+	</TR>
+</TABLE>
+<input type="hidden" name="mode" value="reload">
+</form>

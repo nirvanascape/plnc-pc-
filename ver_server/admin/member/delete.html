@@ -1,0 +1,11 @@
+<?php
+include $_SERVER['DOCUMENT_ROOT'].'/common/config.inc.php';
+$page = $_REQUEST['page'];
+$PageNo = $_REQUEST['PageNo'];
+
+$query = "DELETE FROM member WHERE id='".$_REQUEST[id]."'";
+$result = $objdb->sqlExe( $query );
+
+$url="/admin/member/index.html?page=$page&PageNo=$PageNo";
+$objfunc->goUrl($url);
+?>

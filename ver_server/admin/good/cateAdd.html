@@ -1,0 +1,122 @@
+<?php
+$ca_code = $_REQUEST['ca_code'];
+?>
+<SCRIPT LANGUAGE=JAVASCRIPT>
+<!--
+function content_check(form)
+{
+	var ca_title = form.ca_title.value.length;
+	if ( ca_title == 0 ) {
+		alert("카테고리 제목을 넣으세요.");
+		form.ca_title.focus();
+		return;
+	}
+	form.submit();
+}
+
+function cate_list() {
+		self.location = '/admin/good/index.html?page=cate';
+}
+//-->
+</SCRIPT>
+<?
+if( $_REQUEST[mode] == 'reload' ) {
+  
+	$ca_title=addslashes($_POST['ca_title']);
+	$ca_code = $_GET['ca_code'];
+
+
+	$sql = "SELECT ca_group,ca_step,ca_top FROM category WHERE ca_code='".$ca_code."'";
+	$result = mysql_query( $sql );
+	$row = mysql_fetch_array($result);
+
+	$ca_step = $row[ca_step] + 1 ;
+	$ca_top2 = $row[ca_top] + 1 ;
+
+	$sqlOne = "UPDATE category SET ca_top = ca_top+1 WHERE (ca_group = ".$row[ca_group]." AND ca_top > ".$row[ca_top].")";
+	$sqlTwo = "INSERT INTO category VALUES (NULL,'".$ca_title."','',".$row[ca_group].",".$ca_step.",".$ca_top2.",".$ca_code.")";
+	
+	$objdb->sqlExe($sqlOne);
+	$objdb->sqlExe($sqlTwo);
+
+	$objfunc->reloadParent('카테고리가 추가되었습니다.');
+
+}
+
+$sql = "select ca_title from category where ca_code='".$ca_code."'";
+$currTitle = $objdb->sqlRowone($sql);
+
+$sql = "SELECT * FROM category where ca_group='".$ca_group."' ORDER BY ca_group , ca_step, ca_top desc";
+$result = $objdb->sqlResult($sql);
+?>
+
+
+<TABLE width='90%' border='0'>
+<TR>
+		<TD class='title'>카테고리 관리 </TD>
+</TR>
+</TABLE>
+
+
+
+<TABLE width='90%' border='0'>
+	<TR>
+		<TD>
+
+<FORM name="cateInsert" method="post" target="exeFrame">
+<input type='hidden' name='mode' value='reload'>
+<TABLE class='admintbl' cellpadding='10' align='center'>
+		<TR>
+			<TD colspan=2 class='admintitle'>하부 카테고리 추가</TD>
+		</TR>
+		<TR>
+			<TD class='adminleft'>카테고리 정보</TD>
+			<TD class='adminwhite'>
+				
+			<? while( $row=$objdb->sqlFetch($result) ) {
+			
+			$ca_step = $row[ca_step];
+	
+			switch ($ca_step) {
+				case '0' :
+					$ca_level = '(大)';
+					break;
+				case '1' :
+					$ca_level = '(中)';
+					break;
+				case '2' :
+					$ca_level = '(小)';
+					break;
+				}
+		?>
+				
+					<div style='padding-left:<?=$ca_step*50?>px;padding-top:5;'>
+					<?
+						if( $ca_code == $row[ca_code] ) {
+							echo "<font color='gray'><b>".$ca_level."</b></font>".' '."<b><font color='#FF6000'>".$row[ca_title].'</font></b>';
+						}
+						else {
+							echo "<font color='gray'><b>".$ca_level."</b></font>".' '."<font color='#336699'><b>".$row[ca_title].'</b></font>';
+						}
+					
+					?>
+					</div>
+				<? } ?>
+			</TD>
+		</TR>	
+		<TR>
+			<TD class='adminleft'><font color='#FF6000'><?=$currTitle?></font> 하부 카테고리 추가</TD>
+			<TD class='adminwhite'>
+				<input type='text' name='ca_title' size=30 maxlength=30 class='box' value=''>  
+				<input type='button' value="추가" onClick="content_check(this.form)" class='but orange'>  
+			</TD>
+		</TR>
+		<TR>
+			<TD colspan=3 class='adminwhite' align='center'>
+				<input type='button' value='리스트' onClick="cate_list();" class='but pad3'>
+			</TD>
+		</TR>
+	</TABLE>
+</TD>
+	</TR>
+</TABLE> 

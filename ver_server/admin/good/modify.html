@@ -1,0 +1,441 @@
+<?
+include $_SERVER["DOCUMENT_ROOT"]."/config/etc_added.conf.php";
+include $_SERVER["DOCUMENT_ROOT"]."/config/category.conf.php";
+
+$savedir = $_SERVER["DOCUMENT_ROOT"]."/good_image/";
+
+$sql = "select code, name, nameimg, chknameimg, ca_code, chknew, chkpop, chkrec, smallimg1, middleimg1, middleimg2, smallimg2, middleimg2, smallimg3, middleimg3, smallimg4, middleimg4, chkimage2, chkimage3, chkimage4, summary, content, etc1, etc2, etc3, etc4, etc5, etc6, etc7, etc8, etc9, etc10, chkuse from good where code = '".$_REQUEST['code']."' ";
+$grow = $objdb->sqlRow($sql);
+
+if($_POST['mode']=='reload'){
+	$code=$_POST['code'];
+
+	// 이미지 업로드
+	for( $i = 1; $i <= 4; $i++ ) {
+		// 작은이미지
+		if( $_FILES["smallimg".$i][tmp_name] ) {
+			if( $grow["smallimg".$i] ) {
+				$objfile->deleteFile( $saveDirSys.$grow["smallimg".$i] );
+			}
+			${"smallimg".$i."_name"} = $objfile->uploadFileGood( "smallimg".$i, $code."_s_".$i );
+		}
+
+		if( !${"smallimg".$i."_name"} ) {
+			${"smallimg".$i."_name"} = $grow["smallimg".$i];
+		}
+
+		// 중간이미지
+		if( $_FILES["middleimg".$i][tmp_name] ) {
+			if( $grow["middleimg".$i] ) {
+				$objfile->deleteFile( $saveDirSys.$grow["middleimg".$i] );
+			}
+			${"middleimg".$i."_name"} = $objfile->uploadFileGood( "middleimg".$i, $code."_m_".$i );
+		}
+		if( !${"middleimg".$i."_name"} ) {
+			${"middleimg".$i."_name"} = $grow["middleimg".$i];
+		}
+/*
+		// 큰이미지
+		if( $_FILES["bigimg".$i][tmp_name] ) {
+			if( $grow["bigimg".$i] ) {
+				$objfile->deleteFile( $saveDirSys.$grow["bigimg".$i] );
+			}
+			${"bigimg".$i."_name"} = $objfile->uploadFileGood( "bigimg".$i, $code."_b_".$i );
+		}
+		if( !${"bigimg".$i."_name"} ) {
+			${"bigimg".$i."_name"} = $grow["bigimg".$i];
+		}
+*/
+		// 썸네일
+	}
+
+	if( $_FILES["smallimg".$i][tmp_name] ) {
+			if( $grow["smallimg".$i] ) {
+				$objfile->deleteFile( $saveDirSys.$grow["smallimg".$i] );
+			}
+			${"smallimg".$i."_name"} = $objfile->uploadFileGood( "smallimg".$i, $code."_s_".$i );
+		}
+
+	if( !${"smallimg".$i."_name"} ) {
+		${"smallimg".$i."_name"} = $grow["smallimg".$i];
+	}
+
+	if( $_FILES["nameimg"][tmp_name] ) {
+		if( $grow["nameimg"]){
+			$objfile->deleteFile($saveDirSys.$grow["nameimg"]);			
+		}
+		$nameImage = $objfile->uploadFileGood("nameimg",$code."_name");
+	}
+
+	if( !$_FILES['nameimg']){
+		$nameImage = $grow["nameimg"];
+	}
+
+	if($_POST['smallno'])		$ca_code = $_POST['smallno'];
+	else if($_POST['middleno'])	$ca_code = $_POST['middleno'];
+	else						$ca_code = $_POST['largeno'];
+
+	$chknew = $_POST['chknew'];
+	$chkpop = $_POST['chkpop'];
+	$chkrec = $_POST['chkrec'];
+	$chkhtml = $_POST['chkhtml'];
+	if(empty($chknew))	$chknew = 'n';
+	if(empty($chkpop))	$chkpop = 'n';
+	if(empty($chkrec))	$chkrec = 'n';
+	if(empty($chkhtml))	$chkhtml = 'n';
+
+	for($i=2;$i<=4;$i++){
+		${'chkimage'.$i} = $_POST['chkimage'.$i];
+		if(!${'chkimage'.$i}){
+			${'chkimage'.$i} = 'n';
+		}
+	}
+	$chknameimg = $_POST['chknameimg'];
+	if(!$chknameimg){
+		$chknameimg = 'n';
+	}
+
+	$sql = "UPDATE good SET ".
+		"name = '".$_POST['name']."', ".	
+		"chknameimg = '".$chknameimg."', ".	
+		"nameimg = '".$nameImage."', ".	
+		"ca_code = '".$ca_code."', ".	
+		"chknew = '".$_POST['chknew']."', ".	
+		"chkpop = '".$_POST['chkpop']."', ".	
+		"chkrec = '".$_POST['chkrec']."', ".	
+		"summary = '".$_POST['summary']."', ".	
+		"content = '".$_POST['content']."', ".	
+		"smallimg1 = '".$smallimg1_name."', ".
+		"middleimg1 = '".$middleimg1_name."', ".
+		"smallimg2 = '".$smallimg2_name."', ".
+		"middleimg2 = '".$middleimg2_name."', ".
+		"smallimg3 = '".$smallimg3_name."', ".
+		"middleimg3 = '".$middleimg3_name."', ".
+		"smallimg4 = '".$smallimg4_name."', ".
+		"middleimg4 = '".$middleimg4_name."', ".
+		"chkimage2 = '".$chkimage2."', ".
+		"chkimage3 = '".$chkimage3."', ".
+		"chkimage4 = '".$chkimage4."', ".
+		"etc1 = '".$_POST['etc1']."', ".	
+		"etc2 = '".$_POST['etc2']."', ".	
+		"etc3 = '".$_POST['etc3']."', ".	
+		"etc4 = '".$_POST['etc4']."', ".	
+		"etc5 = '".$_POST['etc5']."', ".	
+		"etc6 = '".$_POST['etc6']."', ".	
+		"etc7 = '".$_POST['etc7']."', ".	
+		"etc8 = '".$_POST['etc8']."', ".	
+		"etc9 = '".$_POST['etc9']."', ".	
+		"etc10 = '".$_POST['etc10']."', ".	
+		"chkuse = '".$_POST['chkuse']."' ".	
+	"where code = '".$code."'";
+	
+	$objdb->sqlExe($sql);
+	$objfunc->reloadParent('수정되었습니다.');
+}
+
+
+
+$sql = "select ca_code, ca_group, ca_parent, ca_step from category where ca_code='".$grow[ca_code]."' ";
+$crow = $objdb->sqlRow($sql);
+
+$sql = "select * from category order by ca_group desc , ca_step, ca_top";
+$rs = $objdb->sqlResult( $sql );
+while( $c = $objdb->sqlFetch( $rs ) ) {
+	if( $c[ca_step]==2 )		$scate[$c[ca_group]][$c[ca_parent]][] = $c;
+	else if( $c[ca_step]==1 )	$mcate[$c[ca_group]][] = $c;
+	else						$lcate[] = $c;
+}
+?>
+<SCRIPT>
+function largeno_change( div, val ) {
+<?
+	echo "div.length = 1;\n";
+	echo "div.options[0].value = '0';\n";
+	echo "div.options[0].text = '++ 중분류 선택 ++';\n";
+
+	foreach( $lcate as $k1 => $v1 ) {
+		echo "if( '".$v1[ca_group]."' == val ) {\n";
+		echo "div.length = ".( count( $mcate[$v1[ca_group]] ) + 1 ).";\n";
+		echo "div.options[0].value = '0';\n";
+		echo "div.options[0].text = '++ 중분류 선택 ++';\n";
+		if($mcate[$v1[ca_group]]){
+			foreach( $mcate[$v1[ca_group]] as $k2 => $v2 ) {
+				$v2[title] = strip_tags( $v2[title] );
+				echo "div.options[".( $k2 + 1 )."].value = '".$v2[ca_code]."';\n";
+				echo "div.options[".( $k2 + 1 )."].text = '".addslashes($v2[ca_title])."';\n";
+			}
+		}
+		echo "return;\n";
+		echo "}\n";
+	}
+?>
+}
+
+function middleno_change( div, val, ca_parent ) {
+<?
+	echo "div.length = 1;\n";
+	echo "div.options[0].value = '0';\n";
+	echo "div.options[0].text = '++ 소분류 선택 ++';\n";
+
+	foreach( $lcate as $k1 => $v1 ) {
+		if($mcate[$v1[ca_group]]){
+			foreach( $mcate[$v1[ca_group]] as $k2 => $v2 ) {
+				if($scate[$v2[ca_group]][$v2[ca_code]]){
+					echo "if( '".$v2[ca_parent]."' == ca_parent && '".$v2[ca_code]."' == val ) {\n";
+					echo "div.length = ".( count( $scate[$v2[ca_group]][$v2[ca_code]] ) + 1 ).";\n";
+					echo "div.options[0].value = '0';\n";
+					echo "div.options[0].text = '++ 소분류 선택 ++';\n";
+					if($scate[$v2[ca_group]][$v2[ca_code]]){
+						foreach( $scate[$v2[ca_group]][$v2[ca_code]] as $k3 => $v3 ) {
+							$v3[title] = strip_tags( $v3[title] );
+							echo "div.options[".( $k3 + 1 )."].value = '".$v3[ca_code]."';\n";
+							echo "div.options[".( $k3 + 1 )."].text = '".addslashes($v3[ca_title])."';\n";
+						}
+					}
+					echo "return;\n";
+					echo "}\n";
+				}
+			}
+		}
+		echo "\n";
+	}
+?>
+}
+
+function doSubmit(form) {
+	if (form.name.value == '' || form.name.value == null) {
+		alert('상품명을 입력하세요');
+		form.name.focus();
+		return false;
+	}
+/*
+	if (form.largeno.value == '0' || form.largeno.value == null) {
+		alert('분류를 선택해주세요')
+		form.largeno.focus();
+		return false;
+	}
+*/
+	if (form.summary.value == '' || form.summary.value == null) {
+		alert('상품개요를 입력하세요');
+		form.summary.focus();
+		return false;
+	}
+}
+</SCRIPT>
+<script src='/javascript/func.js'></script>
+<table width='90%' border='0'>
+	<tr>
+		<td class='title alignleft'>상품 수정</td>
+	</tr>
+</table>
+<table width='90%' cellpadding='5' class='admintbl'>
+<form name='goodRegForm' method='post' target='exeFrame' action='<?=$_SERVER['PHP_SELF']?>?page=modify' ENCTYPE='multipart/form-data' onSubmit='return doSubmit(this);'>
+<input type='hidden' name='mode' value='reload'>
+<input type='hidden' name='code' value='<?=$grow[code]?>'>
+<colgroup><col width='100'><col></colgroup>
+	<tr>
+		<td class='adminleft'>상품분류</td>
+		<td class='adminwhite alignleft' style='display:<?if($_cateUse == 'y'){ echo "block";}else{echo 'none';}?>'>
+			<select name='largeno' class='box' onchange="largeno_change( goodRegForm.middleno, this.value );middleno_change(goodRegForm.smallno, goodRegForm.middleno.options[goodRegForm.middleno.selectedIndex].value, this.value);">
+				<option value='0'>++ 대분류 선택 ++</option>
+<?
+foreach($lcate as $lval){
+?>
+				<option value="<?=$lval[ca_code]?>" <?=($crow[ca_group]==$lval[ca_code]?'selected':'')?>><?=$lval[ca_title]?></option>
+<?}?>
+			</select>
+			<select name='middleno' class='box' onchange="middleno_change( goodRegForm.smallno, this.value, goodRegForm.largeno.value );">
+				<option value='0'>++ 중분류 선택 ++</option>
+<?
+foreach($mcate[$crow[ca_group]] as $mval){
+?>
+				<option value="<?=$mval[ca_code]?>" <?if($crow[ca_parent]==$mval[ca_code] || $crow[ca_code]==$mval[ca_code]){echo "selected";}?>	><?=$mval[ca_title]?></option>
+<?}?>
+			</select>
+			<select name='smallno' class='box'>
+				<option value='0'>++ 소분류 선택 ++</option>
+<?
+foreach($scate[$crow[ca_group]][$crow[ca_code]] as $sval){
+?>
+				<option value="<?=$sval[ca_code]?>" <?=($crow[ca_code]==$sval[ca_code]?'selected':'')?>><?=$sval[ca_title]?></option>
+<?}?>
+			</select>
+		</td>
+		<td class='adminwhite alignleft' style='display:<?if($_cateUse == 'n'){ echo "block";}else{echo 'none';}?>'>
+	카테고리를 <font class="bold red">사용안함</font>으로 설정하셨습니다. 전시여부로 상품을 출력합니다.
+		</td>
+	</tr>
+	<tr>
+		<td class='adminleft'>상품종류</td>
+		<td class='adminwhite alignleft'>
+			<input type='checkbox' name='chknew' value='y' <?=($grow[chknew]=='y'?'checked':'')?>>신상품
+			<input type='checkbox' name='chkpop' value='y' <?=($grow[chkpop]=='y'?'checked':'')?>>인기상품
+			<input type='checkbox' name='chkrec' value='y' <?=($grow[chkrec]=='y'?'checked':'')?>>추천상품
+		</td>
+	</tr>
+<?
+if($grow['chknameimg'] == 'y')	$is_chked = true;
+?>
+	<tr>
+		<td class='adminleft'>상품명</td>
+		<td class='adminwhite alignleft'>
+			<span style="padding:0 0 0 3"><input type='text' name='name' class='box' size='30' value="<?=htmlText($grow[name])?>"> </span><br>
+			<input type='checkbox' name='chknameimg' value='y' onClick="showLayer( this.checked, 'nameImgDiv' );" <?=($is_chked?'checked':'')?> >이미지 사용
+			<font class="bold red">(상품명 이미지를 사용하시면 뷰페이지에 적용됩니다.)</font><br>
+			<table id="nameImgDiv" style="display:<?=$is_chked?'':'none'?>;" cellspacing="0" cellpadding="3">
+			<tr>
+				<td class='adminwhite'>
+					<table border='0'  cellspacing="0" cellpadding="0">
+					<tr>
+						<td class='adminwhite alignleft'><input type='file' name='nameimg' class='box' size='30'></td>
+						<td class='adminwhite alignleft' style='padding-left:10'><?= img_path( $grow[nameimg], 100, 100, '' ) ?></td>
+					</tr>
+					</table>			
+				</td>
+			</tr>
+			</table>
+		</td>
+	</tr>	
+	<tr>
+		<td class='adminleft'>링크정보</td>
+		<td class='adminwhite alignleft'>
+		<a href="/goods/goodView.html?code=<?=$grow[code]?>" class="goodlink" target="_blank">
+		/goods/goodView.html?code=<font class="wine"><?=$grow[code]?></font></a>
+		</td>
+	</tr>
+	<tr>
+		<td class='adminleft'>작은이미지</td>
+		<td class='adminwhite alignleft'>
+			<table border='0' >
+			<tr>
+				<td class='adminwhite alignleft'><input type='file' name='smallimg1' class='box' size='30'></td>
+				<td class='adminwhite alignleft' style='padding-left:10'><?= img_path( $grow[smallimg1], 60, 60, 's_1' ) ?></td>
+			</tr>
+			</table>			
+		</td>
+	</tr>
+		<tr>
+		<td class='adminleft'>중간이미지</td>
+		<td class='adminwhite alignleft'>
+			<table border='0' >
+			<tr>
+				<td class='adminwhite alignleft'><input type='file' name='middleimg1' class='box' size='30'></td>
+				<td class='adminwhite alignleft' style='padding-left:10'><?= img_path( $grow[middleimg1], 60, 60, 'm_1' ) ?></td>
+			</tr>
+			</table>			
+		</td>
+	</tr>
+<!--
+	<tr>
+		<td class='adminleft'>큰이미지</td>
+		<td class='adminwhite alignleft'>
+			<input type='file' name='bigimg1' class='box' size='30'>
+		</td>
+	</tr>
+-->
+<?
+for($i=2;$i<=4;$i++){
+	unset($is_chked);
+	if($grow['chkimage'.$i] == 'y')	$is_chked = true;
+
+?>
+	<TR class=adminwhite>
+		<TD class=adminleft>이미지<?=$i?> 사용</TD>
+		<TD class='alignleft'>
+		<input type="checkbox" name="chkimage<?= $i ?>" value="y" onClick="showLayer( this.checked, 'chkimage<?= $i ?>_div' );" <?=($is_chked?'checked':'')?>> '이미지<?=$i?>' 항목을 사용합니다.
+		</TD>
+	</TR>
+	
+	<tbody id="chkimage<?=$i?>_div" style="display:<?=$is_chked?'':'none'?>;">
+
+	<tr>
+		<td class='adminleft'>작은이미지<?=$i?></td>
+		<td class='adminwhite alignleft'>
+			<table border='0' >
+			<tr>
+				<td class='adminwhite alignleft'><input type='file' name='smallimg<?=$i?>' class='box' size='30'></td>
+				<td class='adminwhite alignleft' style='padding-left:10'><?= img_path( $grow['smallimg'.$i], 60, 60, 's_'.$i ) ?></td>
+			</tr>
+			</table>			
+		</td>
+	</tr>
+		<tr>
+		<td class='adminleft'>중간이미지<?=$i?></td>
+		<td class='adminwhite alignleft'>
+			<table border='0' >
+			<tr>
+				<td class='adminwhite alignleft'><input type='file' name='middleimg<?=$i?>' class='box' size='30'></td>
+				<td class='adminwhite alignleft' style='padding-left:10'><?= img_path( $grow['middleimg'.$i], 60, 60, 'm_'.$i ) ?></td>
+			</tr>
+			</table>			
+		</td>
+	</tr>
+<!--	
+	<tr>
+		<td class='adminleft'>큰이미지<?=$i?></td>
+		<td class='adminwhite alignleft'>
+			<input type='file' name='bigimg<?=$i?>' class='box' size='30'>
+		</td>
+	</tr>
+-->
+	</tbody>
+<?}?>
+	
+	<tr>
+		<td class='adminleft'>전시여부</td>
+		<td class='adminwhite alignleft'>
+			<input type="radio" name="chkuse" value="y" <?if($grow[chkuse] == 'y') echo "checked";?>>전시함
+			<input type="radio" name="chkuse" value="n" <?if($grow[chkuse] == 'n') echo "checked";?>>전시안함
+		</td>
+	</tr>
+	<tr>
+		<td class='adminleft'>상품개요</td>
+		<td class='adminwhite alignleft'>
+			<textarea name='summary' rows='4' cols='100%' class='box'><?=$grow[summary]?></textarea>
+		</td>
+	</tr>
+	<tr>
+		<td class='adminleft'>상품설명</td>
+		<td class='adminwhite alignleft'>
+		<input type='hidden' name='chkhtml' value='y'>
+		<?php
+			include $_SERVER['DOCUMENT_ROOT'].'/common/new_editor/spaw_control.class.php';
+			$sw = new SPAW_Wysiwyg( 'content', $grow[content], '100%', '300px', false, "full"  );
+			$sw->show();
+		?>
+		</td>
+	</tr>
+</table>
+
+<table width='90%' cellpadding='5' class='admintbl'>
+<colgroup><col width='100'><col></colgroup>
+	<tr class='admingray'>
+		<td><b>기본 항목명</b></td>
+		<td><b>항목내용</b></td>
+	</tr>
+<?
+for($i=1;$i<=10;$i++){
+	if(${_ETC_ADDED.$i}){
+?>
+	<tr class='adminwhite'>
+		<td><?=${_ETC_ADDED.$i}?></td>
+		<td>
+			<textarea name='etc<?=$i?>' class='box' cols='100%'><?=$grow['etc'.$i]?></textarea>
+		</td>
+	</tr>
+<?
+	}
+}
+?>
+</table>
+
+<table align='center'>
+	<tr>
+		<td>
+			<input type='submit' name='submit' value='수정' class='but blue pad5'>
+			<input type='reset' value='취소' class='but orange pad5'>
+			<input type='button' value='목록' class='but green pad5' onclick="self.location='<?=$_SERVER['PHP_SELF']?>?page=list'">
+		</td>
+	</tr>
+</form>
+</table>

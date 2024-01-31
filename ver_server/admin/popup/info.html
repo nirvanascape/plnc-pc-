@@ -1,0 +1,426 @@
+<?
+$TBLPU = "popup";
+
+$saveDir = "/menu_image/";
+$saveDirSys = _DOCUMENT_ROOT_.$saveDir;
+
+if( !$_REQUEST[id] ) $_REQUEST[id] = "popup1";
+
+$objfunc->post_var_trim();
+if( $objfunc->post_var_chk( 'mode', 'update_popup' ) ) {
+	if( !form_empty_chk( 'id' ) ) alert( '팝업을 선택해 주세요.' );
+
+	if( $_POST[show_scrollbar] != 'y' ) $_POST[show_scrollbar] = "n";
+	if( $_POST[chkbutton] != 'y' ) $_POST[chkbutton] = "n";
+
+	$sql = "SELECT button FROM $TBLPU ".
+			"WHERE id = '".$_POST[id]."'";
+	$dbbutton = $objdb->sqlRowOne( $sql );
+
+	$buttons = $_FILES[button];
+
+	if( $buttons[tmp_name] ) {
+		if( $dbbutton ) $objfile->delete_file( $saveDirSys.$dbbutton );
+
+		$button = $objfile->upload_file( $buttons[tmp_name], $buttons[name], $saveDirSys );
+	}
+	else {
+		$button = $dbbutton;
+	}
+
+	if( empty( $button ) ) $_POST[chkbutton] = "y";
+
+	$sql = "SELECT COUNT( * ) FROM $TBLPU ".
+			"WHERE id = '".$_POST[id]."'";
+	$cnt = $objdb->sqlRowOne( $sql );
+
+	if( !$cnt ) {
+		$sql = "INSERT INTO $TBLPU ( id ) VALUES ( '".$_POST[id]."' )";
+		$objdb->sqlExe( $sql );
+	}
+
+	$sql = "UPDATE $TBLPU SET ".
+			"type = '".$_POST[type]."', ".
+			"chkuse = '".$_POST[chkuse]."', ".
+			"endday = '".$_POST[endday]."', ".
+			"title = '".$_POST[title]."', ".
+			"width = '".$_POST[width]."', ".
+			"height = '".$_POST[height]."', ".
+			"content = '".$_POST[pop_content]."', ".
+			"toploc = '".$_POST[toploc]."', ".
+			"leftloc = '".$_POST[leftloc]."', ".
+			"timeterm = '".$_POST[timeterm]."', ".
+			"timemethod = '".$_POST[timemethod]."', ".
+			"timetitle = '".$_POST[timetitle]."', ".
+			"bgcolor = '".$_POST[bgcolor]."', ".
+			"fontcolor = '".$_POST[fontcolor]."', ".
+			"chkbutton = '".$_POST[chkbutton]."', ".
+			"button = '".$button."', ".
+			"show_scrollbar = '".$_POST[show_scrollbar]."', ".
+			"l_opacity = '".$_POST[l_opacity]."', ".
+			"l_type = '".$_POST[l_type]."', ".
+			"l_color_title = '".$_POST[l_color_title]."', ".
+			"l_color_border = '".$_POST[l_color_border]."' ".
+			"WHERE id = '".$_POST[id]."'";
+	$objdb->sqlExe( $sql );
+	$objfunc->reloadParentUrl();
+}
+//$objfunc->alert('1', false);
+$sql = "UPDATE $TBLPU SET ".
+		"chkuse = 'n' ".
+		"WHERE endday < '".TODAY."'";
+
+//$objfunc->alert('2', false);
+
+$objdb->sqlExe( $sql );
+//$objfunc->alert('2', false);
+$sql = "SELECT * FROM $TBLPU ".
+		"WHERE id = '".$_REQUEST[id]."'";
+$row = $objdb->sqlRow( $sql );
+
+$dbchkuse			= $row[chkuse];
+$dbendday			= $row[endday];
+$dbtype				= $row[type];
+
+$dbtitle				= $row[title];
+$dbcontent			= $row[content];
+$dbwidth				= $row[width];
+$dbheight				= $row[height];
+
+$dbtoploc				= $row[toploc];
+$dbleftloc				= $row[leftloc];
+$dbtimeterm			= $row[timeterm];
+$dbtimemethod		= $row[timemethod];
+$dbtimetitle			= $row[timetitle];
+$dbbgcolor			= $row[bgcolor];
+$dbfontcolor			= $row[fontcolor];
+$dbchkbutton			= $row[chkbutton];
+$dbbutton				= $row[button];
+$dbshow_scrollbar	= $row[show_scrollbar];
+
+$dbl_opacity			= $row[l_opacity];
+$dbl_type				= $row[l_type];
+$dbl_color_title		= $row[l_color_title];
+$dbl_color_border	= $row[l_color_border];
+
+// default setting
+if( !$dbendday )				$dbendday			= TODAY;
+
+if( !$dbtoploc )				$dbtoploc				= 300;
+if( !$dbleftloc )				$dbleftloc				= 300;
+if( $dbtimeterm == "" )		$dbtimeterm			= 24;
+if( !$dbtimemethod )			$dbtimemethod		= "h";
+if( !$dbtimetitle )				$dbtimetitle			= "오늘 하루동안 이창을 열지 않습니다.";
+if( !$dbbgcolor )				$dbbgcolor			= "#FFDD82";
+if( !$dbfontcolor )			$dbfontcolor			= "#000000";
+if( !$dbchkbutton )			$dbchkbutton			= "y";
+
+if( $dbl_opacity == '' )		$dbl_opacity			= 100;
+if( !$dbl_color_title )		$dbl_color_title		= '#EEEEEE';
+if( !$dbl_color_border )		$dbl_color_border	= '#D54141';
+?>
+<script src="/javascript/func.js"></script>
+
+<form name="f_update_popup" method=post enctype="multipart/form-data" onSubmit="update_popup( this );">
+<table width='90%'>
+	<tr>
+		<td class='title alignleft'>팝업 관리</td>
+	</tr>
+</table>
+
+<div class="dotbox">
+<ul>
+	<li>팝업종류를 "<B>레이어 팝업</B>"으로 선택하시면 브라우저의 팝업제한에 상관없이 팝업창을 띄울 수 있습니다.</li>
+</ul>
+</div>
+		
+		<!-- 내용삽입 -->
+		
+
+				<!-- HELP BOX -->
+				<?
+				unset( $help_msgs );
+
+				$help_msgs[] = "사이트 방문시에 메인페이지에 뜨는 팝업창을 등록 및 수정합니다.";
+				$help_msgs[] = "미리보기 기능 사용시에는 창이 뜨기까지 조금 시간이 소요될 수 있습니다.";
+				$help_msgs[] = "미리보기 기능 사용시에는 '팝업하단 창닫기버튼' 설정 및 '사용자 체크 후 팝업 열지않기' 설정이 적용되지 않습니다.";
+
+				?>
+				<!-- HELP BOX -->
+
+				<!-- 메뉴부분 -->
+				<?
+				$sql = "SELECT id FROM $TBLPU ".
+						"WHERE chkuse = 'y'";
+				$ids = $objdb->sqlArrayOne( $sql );
+				$menu = array(
+					"popup1"		=>	 "팝업관리 1",
+					"popup2"		=>	 "팝업관리 2",
+					"popup3"		=>	 "팝업관리 3"
+				);
+				$col = count( $menu );
+				?>
+
+				<SCRIPT>
+				
+				function getColorPicker( ctl1, ctl2, ctl3 ) {
+					var selColor = window.open( "/common/colorpicker/colorpicker.php?ctl1=" + ctl1 + "&ctl2=" + ctl2 + "&ctl3=" + ctl3, "selColor","width=290,height=380,resizable=0,scrollbars=0,status=yes" );
+					selColor.focus();
+				}
+
+				function set_popup_id( id ) {
+					self.location = '<?=$_SERVER["PHP_SELF"]?>?id=' + id;
+				}
+				</SCRIPT>
+
+				<TABLE border=0 cellpadding=5 cellspacing=1 bgcolor=A6BDC2 width=100% class='tblfix'>
+				<TR class='adminwhite' align='center'>
+					<? foreach( $menu as $id => $title ) {?>
+					<TD width="33%"<? if( $_REQUEST[id] == $id ) { ?>bgcolor="#A8B6DB" style="font-weight:bold;"<? } else { ?>onMouseOver=this.style.backgroundColor="#EBEBEB" onMouseOut=this.style.backgroundColor=""<? } ?>><a href="javascript:set_popup_id( '<?= $id ?>' );" class=white><?= $title ?></a><?= ( is_array($ids) && in_array( $id, $ids ) ) ? ' <font class=wine>[사용]</font>' : '' ?></TD>
+					<?}?>
+				</TR>
+				</TABLE>
+				<!-- 메뉴부분 -->
+
+				<?= $tblspace ?>
+
+				<!-- 리스트테블 -->
+				<script>
+				var w_preview = '';
+
+				function preview_popup() {
+					var f = document.forms['f_update_popup'];
+
+					var width = f.elements['width'].value;
+					var height = eval( f.elements['height'].value ) + 30;
+					var top = f.elements['toploc'].value;
+					var left = f.elements['leftloc'].value;
+					var property = new Array();
+
+					property[0] = 'width=' + width;
+					property[1] = 'height=' + height;
+					property[2] = 'top=' + top;
+					property[3] = 'left=' + left;
+
+					winObjClose( w_preview );
+					w_preview = window.open( '', 'w_preview', property.join() );
+
+					f.target = 'w_preview';
+					f.action = '/shopuser/etc/popupView.html?id=' + f.elements['id'].value;
+
+					SPAW_UpdateFields();
+
+					f.submit();
+				}
+
+				function update_popup( f ) {
+					winObjClose( w_preview );
+
+					f.target = makeTarget();
+					f.action = '';
+
+					SPAW_UpdateFields();
+				}
+				function showLayer( chk, layerid ) {
+					if( typeof( layerid ) == "string" ) layerid = document.getElementById( layerid );
+
+					if( chk ) layerid.style.display = "";
+					else layerid.style.display = "none";
+				}
+				</script>
+
+				
+
+				<TABLE border=0 cellpadding=0 cellspacing=1 width=100% class="admintbl tblfix">
+				<col width=20%></col>
+				<col></col>
+				<col width=20%></col>
+				<col></col>
+				<TR class=adminwhite>
+					<TD class="adminleft">팝업사용여부</TD>
+					<TD>
+					<input type="radio" name="chkuse" value="y" <? if( $dbchkuse == "y" ) echo "checked"; ?>>사용합니다.
+					<input type="radio" name="chkuse" value="n" <? if( $dbchkuse != "y" ) echo "checked"; ?>>사용하지 않습니다.
+					</TD>
+					<TD class=adminleft>팝업종료일</TD>
+					<TD>
+					<input type=text size=10 name=endday  class=box value="<?= $dbendday ?>">
+					</TD>
+				</TR>
+				<TR class=adminwhite>
+					<TD class=adminleft>팝업종류</TD>
+					<TD colspan=3>
+					<input type="radio" name="type" value="" onClick="showLayer( false, 'tr_type_l' );" <? if( $dbtype != 'l' ) echo "checked"; ?>>윈도우 팝업
+					<font class=small>- 새로운 윈도우 창이 오픈되면서 팝업이 띄워집니다.</font>
+					<BR>
+					<input type="radio" name="type" value="l" onClick="showLayer( true, 'tr_type_l' );" <? if( $dbtype == 'l' ) echo "checked"; ?>>레이어 팝업
+					<font class=small>- 팝업 형태의 레이어가 생성되면서 팝업이 띄워집니다.</font>
+					</TD>
+					</TD>
+				</TR>
+				
+
+				<TR class=adminwhite id="tr_type_l" style="display:<?= $dbtype == 'l' ? '' : 'none' ?>;">
+					<TD class="adminleft">레이어설정</TD>
+					<TD colspan=3>
+					
+					<TABLE border=0 cellpadding=5 cellspacing=1 width=100% class="admintbl tblfix">
+					<col width=20%></col>
+					<col></col>
+					<col width=20%></col>
+					<col></col>
+					<TR class=adminwhite>
+						<TD class='adminleft adminsky'>투명도</TD>
+						<TD colspan=3>
+						<input type="text" name="l_opacity" value="<?= $objfunc->htmlText( $dbl_opacity ) ?>" size=8 class="boxc imedisabled" onKeyDown="onlyNumber();" onFocus="this.select();">
+						<font class=small>
+						- 0 ~ 100 사이의 숫자 입력. 숫자가 작아질수록 투명도가 증가합니다.
+						</font>
+						</TD>
+					</TR>
+					<TR class=adminwhite>
+						<TD class='adminleft adminsky'>팝업형태</TD>
+						<TD colspan=3>
+						<input type="radio" name="l_type" value="" onClick="showLayer( false, 'tr_l_type_b' );" <? if( $dbl_type != 'b' ) echo "checked"; ?>>윈도우형
+						<font class=small>
+						- 실제 윈도우 팝업과 유사한 디자인으로 표시됩니다. 디자인 변경 불가.
+						</font>
+						<BR>
+						<input type="radio" name="l_type" value="b" onClick="showLayer( true, 'tr_l_type_b' );" <? if( $dbl_type == 'b' ) echo "checked"; ?>>테두리형
+						<font class=small>
+						- 팝업 영역의 바깥쪽에 테두리를 두어 표시됩니다. 디자인 변경 가능.
+						</font>
+						</TD>
+					</TR>
+					<TR class=adminwhite id='tr_l_type_b' style="display:<?= $dbl_type == 'b' ? '' : 'none' ?>;">
+						<TD class="adminleft adminsky">타이틀색상</TD>
+						<TD>
+						<?= $objfunc->getColorPickerSet( 'f_update_popup', 'l_color_title', $dbl_color_title ) ?>
+						</TD>
+						<TD class="adminleft adminsky">테두리색상</TD>
+						<TD>
+						<?= $objfunc->getColorPickerSet( 'f_update_popup', 'l_color_border', $dbl_color_border ) ?>
+						</TD>
+					</TR>
+					</TABLE>
+
+					</TD>
+				</TR>
+				
+
+				<TR class=adminwhite>
+					<TD class=adminleft>팝업타이틀</TD>
+					<TD colspan=3 class="alignleft">
+					<input type="text" name="title" value="<?= $dbtitle?>" class="box fullwidth">
+					</TD>
+				</TR>
+				<TR class=adminwhite>
+					<TD class=adminleft>팝업내용</TD>
+					<TD colspan=3 class="alignleft">
+					<?
+					include $_SERVER['DOCUMENT_ROOT'].'/common/new_editor/spaw_control.class.php';
+					$sw = new SPAW_Wysiwyg('pop_content', $dbcontent, '100%', '300px', false, "full"  );
+					$sw->show();
+					?>
+					</TD>
+				</TR>
+				<TR class=adminwhite>
+					<TD class=adminleft>팝업크기</TD>
+					<TD class="alignleft">
+					가로 <input type="text" size="5" name="width" value="<?= $objfunc->htmlText( $dbwidth ) ?>" class='box' onFocus="this.select();" onKeyDown="onlyNumber();"> *
+					세로 <input type="text" size="5" name="height" value="<?= $objfunc->htmlText( $dbheight ) ?>" class='box' onFocus="this.select();" onKeyDown="onlyNumber();">
+					</TD>
+					<TD class=alignleft>팝업위치</TD>
+					<TD class="alignleft">
+					위에서 <input type="text" size="5" name="toploc" value="<?= $objfunc->htmlText( $dbtoploc ) ?>" class='box' onFocus="this.select();" onKeyDown="onlyNumber();"> * 
+					좌에서 <input type="text" size="5" name="leftloc" value="<?= $objfunc->htmlText( $dbleftloc ) ?>" class='box' onFocus="this.select();" onKeyDown="onlyNumber();"> 	
+					</TD>
+				</TR>
+				<TR class=adminwhite>
+					<TD class=adminleft>스크롤 여부</TD>
+					<TD colspan=3 class="alignleft">
+					<input type=checkbox name='show_scrollbar' value='y' <? if( $dbshow_scrollbar == 'y' ) echo "checked"; ?>>팝업창에 스크롤바를 사용합니다.
+					</TD>
+				</TR>
+				<TR class=adminwhite>
+					<TD class=adminleft>팝업열지않기 시간</TD>
+					<TD colspan=3 class="alignleft">
+					<input type="text" name="timeterm" value="<?= $objfunc->htmlText( $dbtimeterm ) ?>" class="box" onFocus="this.select();" onKeyDown="onlyNumber();" size=5>
+					<select name="timemethod" class="box">
+					<option value="h" <? if( $dbtimemethod == "h" ) echo "selected"; ?>>시간</option>
+					<option value="d" <? if( $dbtimemethod == "d" ) echo "selected"; ?>>일</option>
+					</select>
+					<font class=small> - 항상 열리게 하길 원하는 경우, 값을 '0' 으로 입력하시길 바랍니다. </font>
+					</TD>
+				</TR>
+				<TR class=adminwhite>
+					<TD class=adminleft>팝업열지않기 문구</TD>
+					<TD colspan=3 class="alignleft">
+					<input type="text" name="timetitle" value="<?= $objfunc->htmlText( $dbtimetitle ) ?>" class="box fullwidth">
+					</TD>
+				</TR>
+				<TR class=adminwhite>
+					<TD class=adminleft>팝업하단 배경색</TD>
+					<TD class="alignleft">
+					<?= $objfunc->getColorPickerSet( "f_update_popup", "bgcolor", $dbbgcolor ) ?>
+					</TD>
+					<TD class=adminleft>팝업하단 글자색</TD>
+					<TD class="alignleft">
+					<?= $objfunc->getColorPickerSet( "f_update_popup", "fontcolor", $dbfontcolor ) ?>
+					</TD>
+				</TR>
+				<!-- <TR class=adminwhite>
+					<TD class=alignleft>팝업하단<br>창닫기버튼<br><font class="red">(미리보기 불가능)</font></TD>
+					<TD colspan=3>
+					
+					<TABLE border=0 cellpadding=5 cellspacing=1 width=100% class="admintbl tblfix">
+					<TR class=adminsky>
+						<TD>
+						<input type=radio name="chkbutton" value="y" <? if( $dbchkbutton == "y" ) echo "checked"; ?>>기본제공되는 버튼을 사용합니다.
+						</TD>
+						<TD>
+						<input type=radio name="chkbutton" value="n" <? if( $dbchkbutton != "y" ) echo "checked"; ?>>직접 제작한 버튼을 사용합니다.
+						</TD>
+					</TR>
+					<TR class=adminwhite align=center>
+						<TD><img src="/shopuser/btn_img/popup_close.gif"></TD>
+						<TD><?= make_img( $saveDir.$dbbutton, 200 ) ?></TD>
+					</TR>
+					<TR class=adminwhite>
+						<TD>
+						</TD>
+						<TD>
+						<input type="file" name="button" class="box fullwidth">
+						</TD>
+					</TR>
+					</TABLE>
+
+					</TD>
+				</TR> -->
+				</TABLE>
+				<!-- 리스트테블 -->
+
+				<!-- button -->
+			<!-- 	<TABLE border=0 cellpadding=20 cellspacing=0 width=100%>
+				<TR>
+					<TD align=center>
+					<input type=image border="0" src="/shopadmin/img2/but_ok.gif" width="63" height="23" hspace=3 align="absmiddle">
+					<a href="javascript:preview_popup();"><img border="0" src="/shopadmin/img2/but_preview.gif" width="80" height="23" hspace=3 align="absmiddle"></a>
+					</TD>
+				</TR>
+				</TABLE> -->
+				<!-- button -->
+
+				<input type=hidden name="mode" value="update_popup">
+				<input type=hidden name="id" value="<?= $_REQUEST[id] ?>">
+
+		<!-- 내용삽입 -->
+
+<table align='center'>
+	<tr>
+		<td>
+			<input type='submit' value='확인' class='but blue pad5'>
+		</td>
+	</tr>
+</table>
+</form>

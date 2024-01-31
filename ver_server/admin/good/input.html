@@ -1,0 +1,362 @@
+<?
+include $_SERVER["DOCUMENT_ROOT"]."/config/etc_added.conf.php";
+include $_SERVER["DOCUMENT_ROOT"]."/config/category.conf.php";
+$savedir = $_SERVER["DOCUMENT_ROOT"]."/good_image/";
+
+if($_POST['mode']=='reload'){
+	// 상품코드
+	while( 1 ) {
+		$code = $objfunc->getCode();
+		$sql = "SELECT COUNT(*) FROM good WHERE code = '".$code."'";
+		$cnt = $objdb->sqlRowOne( $sql );
+
+		if( !$cnt ) break;
+	}
+
+	// 이미지 업로드
+	for( $i = 1; $i <= 4; $i++ ) {
+/*
+		// 큰이미지
+		if( $_FILES["bigimg".$i][tmp_name] ) {
+			${"bigimg".$i."_name"} = $objfile->uploadFileGood( "bigimg".$i, $code."_b_".$i );
+		}
+*/
+		// 작은이미지
+
+		if( $_FILES["smallimg".$i][tmp_name] ) {
+			${"smallimg".$i."_name"} = $objfile->uploadFileGood( "smallimg".$i, $code."_s_".$i );
+		}
+
+		// 중간이미지
+		if( $_FILES["middleimg".$i][tmp_name] ) {
+			${"middleimg".$i."_name"} = $objfile->uploadFileGood( "middleimg".$i, $code."_m_".$i );
+		}
+	}
+
+	if( $_FILES["nameimg"][tmp_name] ) {
+		$nameImage = $objfile->uploadFileGood("nameimg",$code."_name");
+	}
+
+	if($_POST['smallno'])		$ca_code = $_POST['smallno'];
+	else if($_POST['middleno'])	$ca_code = $_POST['middleno'];
+	else						$ca_code = $_POST['largeno'];
+
+	$chknew = $_POST['chknew'];
+	$chkpop = $_POST['chkpop'];
+	$chkrec = $_POST['chkrec'];
+	$chkhtml = $_POST['htmlcheck'];
+	if(empty($chknew))	$chknew = 'n';
+	if(empty($chkpop))	$chkpop = 'n';
+	if(empty($chkrec))	$chkrec = 'n';
+	if(empty($chkhtml))	$chkhtml = 'n';
+
+	for($i=2;$i<=4;$i++){
+		${'chkimage'.$i} = $_POST['chkimage'.$i];
+	}
+
+	$sql = "INSERT INTO good(".
+		"code, ca_code, chknew, chkpop, chkrec, name, ".
+		"chknameimg, nameimg, ".
+		"content, chkhtml, wdate, summary, ".
+		"smallimg1, middleimg1, ".
+		"smallimg2, middleimg2, ".
+		"smallimg3, middleimg3, ".
+		"smallimg4, middleimg4, ".
+		"chkimage2, chkimage3, chkimage4, ".
+		"etc1, etc2, etc3, etc4, etc5, ".
+		"etc6, etc7, etc8, etc9, etc10 ,chkuse".
+	")VALUES(".
+		"'".$code."', '".$ca_code."', '".$chknew."', '".$chkpop."', '".$chkrec."', '".$_POST['name']."', ".
+		"'".$_POST['chknameimg']."', '".$nameImage."', ".
+		"'".$_POST['content']."', '".$chkhtml."', SYSDATE(), '".$_POST['summary']."', ".
+		"'".$smallimg1_name."', '".$middleimg1_name."', ".
+		"'".$smallimg2_name."', '".$middleimg2_name."', ".
+		"'".$smallimg3_name."', '".$middleimg3_name."', ".
+		"'".$smallimg4_name."', '".$middleimg4_name."', ".
+		"'".$chkimage2."', '".$chkimage3."', '".$chkimage4."', ".
+	"'".$_POST['etc1']."','".$_POST['etc2']."','".$_POST['etc3']."','".$_POST['etc4']."','".$_POST['etc5']."',".
+    "'".$_POST['etc6']."','".$_POST['etc7']."','".$_POST['etc8']."','".$_POST['etc9']."','".$_POST['etc10']."','".$_POST['chkuse']."'".
+	")";
+	$objdb->sqlExe($sql);
+	$objfunc->reloadParent('등록되었습니다.');
+}
+
+$sql = "select * from category order by ca_group desc , ca_step, ca_top";
+$rs = $objdb->sqlResult( $sql );
+while( $c = $objdb->sqlFetch( $rs ) ) {
+	if( $c[ca_step]==2 )		$scate[$c[ca_group]][$c[ca_parent]][] = $c;
+	else if( $c[ca_step]==1 )	$mcate[$c[ca_group]][] = $c;
+	else						$lcate[] = $c;
+}
+?>
+<SCRIPT>
+function largeno_change( div, val ) {
+<?
+	echo "div.length = 1;\n";
+	echo "div.options[0].value = '0';\n";
+	echo "div.options[0].text = '++ 중분류 선택 ++';\n";
+
+	foreach( $lcate as $k1 => $v1 ) {
+		echo "if( '".$v1[ca_group]."' == val ) {\n";
+		echo "div.length = ".( count( $mcate[$v1[ca_group]] ) + 1 ).";\n";
+		echo "div.options[0].value = '0';\n";
+		echo "div.options[0].text = '++ 중분류 선택 ++';\n";
+		if($mcate[$v1[ca_group]]){
+			foreach( $mcate[$v1[ca_group]] as $k2 => $v2 ) {
+				$v2[title] = strip_tags( $v2[title] );
+				echo "div.options[".( $k2 + 1 )."].value = '".$v2[ca_code]."';\n";
+				echo "div.options[".( $k2 + 1 )."].text = '".addslashes($v2[ca_title])."';\n";
+			}
+		}
+		echo "return;\n";
+		echo "}\n";
+	
+	}
+?>
+}
+
+function middleno_change( div, val, ca_parent ) {
+<?
+	echo "div.length = 1;\n";
+	echo "div.options[0].value = '0';\n";
+	echo "div.options[0].text = '++ 소분류 선택 ++';\n";
+
+	foreach( $lcate as $k1 => $v1 ) {
+		if($mcate[$v1[ca_group]]){
+			foreach( $mcate[$v1[ca_group]] as $k2 => $v2 ) {
+				if($scate[$v2[ca_group]][$v2[ca_code]]){
+					echo "if( '".$v2[ca_parent]."' == ca_parent && '".$v2[ca_code]."' == val ) {\n";
+					echo "div.length = ".( count( $scate[$v2[ca_group]][$v2[ca_code]] ) + 1 ).";\n";
+					echo "div.options[0].value = '0';\n";
+					echo "div.options[0].text = '++ 소분류 선택 ++';\n";
+					if($scate[$v2[ca_group]][$v2[ca_code]]){
+						foreach( $scate[$v2[ca_group]][$v2[ca_code]] as $k3 => $v3 ) {
+							$v3[title] = strip_tags( $v3[title] );
+							echo "div.options[".( $k3 + 1 )."].value = '".$v3[ca_code]."';\n";
+							echo "div.options[".( $k3 + 1 )."].text = '".addslashes($v3[ca_title])."';\n";
+						}
+					}
+					echo "return;\n";
+					echo "}\n";
+				}
+			}
+		}
+		echo "\n";
+	}
+?>
+}
+
+function doSubmit(form) {
+	if (form.name.value == '' || form.name.value == null) {
+		alert('상품명을 입력하세요');
+		form.name.focus();
+		return false;
+	}
+	if (form.smallimg1.value == '' || form.smallimg1.value == null ) {
+		alert('작은이미지를 업로드하세요');
+		return false;
+	}
+	if (form.middleimg1.value == '' || form.middleimg1.value == null) {
+		alert('중간이미지를 업로드하세요')
+		return false;
+	}
+/*
+	if (form.largeno.value == '0' || form.largeno.value == null) {
+		alert('분류를 선택해주세요')
+		form.largeno.focus();
+		return false;
+	}
+*/
+/*
+	if (form.bigimg1.value == '' || form.bigimg1.value == null) {
+	alert('큰이미지를 업로드하세요')
+	return false;
+	}
+*/
+	if (form.summary.value == '' || form.summary.value == null) {
+		alert('상품개요를 입력하세요');
+		form.summary.focus();
+		return false;
+	}
+}
+</SCRIPT>
+<script src='/javascript/func.js'></script>
+<table width='90%' border='0'>
+	<tr>
+		<td class='title'>상품 등록</td>
+	</tr>
+</table>
+
+<div class="dotbox">
+<ul>
+	<li>상품 등록 전에 [<B>카테고리</B>]를 먼저 등록해 주세요. (카테고리가 없는 경우는 등록하지 않으셔도 무방합니다.)</li>
+	<li>상품 등록 전에 [<B>상품관련 설정</B>]에서 필요한 항목을 먼저 등록해 주세요.</li>
+	<li>[<b>카테고리</b>]를 사용하지 않으실경우 <font class="bold red">전시여부</font>로 상품을 출력합니다.</li>
+</ul>
+</div>
+
+
+<table width='90%' cellpadding='5' class='admintbl'>
+<form name='goodRegForm' method='post' target='exeFrame' action='<?=$_SERVER['PHP_SELF']?>?page=input' ENCTYPE='multipart/form-data' onSubmit='return doSubmit(this);'>
+<input type='hidden' name='mode' value='reload'>
+<colgroup><col width='100'><col></colgroup>
+	<tr>
+		<td class='adminleft'>상품분류</td>
+		<td class='adminwhite'>
+<?if($_cateUse == 'y'){?>
+			<select name='largeno' class='box' onchange="largeno_change( goodRegForm.middleno, this.value );middleno_change(goodRegForm.smallno, goodRegForm.middleno.options[goodRegForm.middleno.selectedIndex].value, this.value);">
+				<option value='0'>++ 대분류 선택 ++</option>
+<?
+$sql="select ca_code, ca_title from category where ca_parent=0 order by ca_step ";
+$result = $objdb->sqlResult($sql);
+while($row = $objdb->sqlFetch($result)){
+?>
+				<option value="<?=$row[ca_code]?>"><?=$row[ca_title]?></option>
+<?}?>
+			</select>
+			<select name='middleno' class='box' onchange="middleno_change( goodRegForm.smallno, this.value, goodRegForm.largeno.value );">
+				<option value='0'>++ 중분류 선택 ++</option>
+			</select>
+			<select name='smallno' class='box'>
+				<option value='0'>++ 소분류 선택 ++</option>
+			</select>
+<?}else{?>
+			<font class="bold red">사용안함</font>
+<?}?>
+		</td>
+	</tr>
+	<tr>
+		<td class='adminleft'>상품종류</td>
+		<td class='adminwhite'>
+			<input type='checkbox' name='chknew' value='y'>신상품
+			<input type='checkbox' name='chkpop' value='y'>인기상품
+			<input type='checkbox' name='chkrec' value='y'>추천상품
+		</td>
+	</tr>
+	<tr>
+		<td class='adminleft'>상품명</td>
+		<td class='adminwhite'>
+			<input type='text' name='name' class='box' size='30'> <br>
+			<input type='radio' name='chknameimg' value='y' onClick="showLayer( true, 'nameImgDiv' );" >이미지사용
+			<input type='radio' name='chknameimg' value='n' onClick="showLayer( false, 'nameImgDiv' );" checked>미사용 <font class="bold red">(상품명 이미지를 사용하시면 뷰페이지에 적용됩니다.)</font><br>
+			<table id="nameImgDiv" style="display:none" cellpadding="0" cellspacing="0">
+			<tr>
+				<td class='adminwhite'>
+					<input type='file' name='nameimg' class='box' size='30'>
+				</td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<td class='adminleft'>작은이미지</td>
+		<td class='adminwhite'>
+			<input type='file' name='smallimg1' class='box' size='30'>
+		</td>
+	</tr>
+		<tr>
+		<td class='adminleft'>중간이미지</td>
+		<td class='adminwhite'>
+			<input type='file' name='middleimg1' class='box' size='30'>
+		</td>
+	</tr>
+<!--
+	<tr>
+		<td class='adminleft'>큰이미지</td>
+		<td class='adminwhite alignleft'>
+			<input type='file' name='bigimg1' class='box' size='30'>
+		</td>
+	</tr>
+-->
+<?
+for($i=2;$i<=4;$i++){
+?>
+	<TR class=adminwhite>
+		<TD class=adminleft>이미지<?=$i?> 사용</TD>
+		<TD>
+			<input type='radio' name='chkimage<?= $i ?>' value='y' onClick="showLayer( true, 'chkimage<?= $i ?>_div' );" >사용
+			<input type='radio' name='chkimage<?= $i ?>' value='n' onClick="showLayer( false, 'chkimage<?= $i ?>_div' );" checked>미사용
+		</TD>
+	</TR>
+	
+	<tbody id="chkimage<?=$i?>_div" style="display:none;">
+
+	<tr>
+		<td class='adminleft'>작은이미지<?=$i?></td>
+		<td class='adminwhite'>
+			<input type='file' name='smallimg<?=$i?>' class='box' size='30'>
+		</td>
+	</tr>
+		<tr>
+		<td class='adminleft'>중간이미지<?=$i?></td>
+		<td class='adminwhite'>
+			<input type='file' name='middleimg<?=$i?>' class='box' size='30'>
+		</td>
+	</tr>
+<!--
+	<tr>
+		<td class='adminleft'>큰이미지<?=$i?></td>
+		<td class='adminwhite alignleft'>
+			<input type='file' name='bigimg<?=$i?>' class='box' size='30'>
+		</td>
+	</tr>
+-->
+	</tbody>
+<?}?>
+	<tr>
+		<td class='adminleft'>전시여부</td>
+		<td class='adminwhite'>
+			<input type="radio" name="chkuse" value="y" checked>전시함
+			<input type="radio" name="chkuse" value="n">전시안함
+		</td>	
+	</tr>
+	<tr>
+		<td class='adminleft'>상품개요</td>
+		<td class='adminwhite'>
+			<textarea name='summary' rows='4' cols='100%' class='box'></textarea>
+		</td>
+	</tr>
+	<tr>
+		<td class='adminleft'>상품설명</td>
+		<td class='adminwhite'>
+<input type=hidden name=htmlcheck value="y">
+		<?php
+			include $_SERVER['DOCUMENT_ROOT'].'/common/new_editor/spaw_control.class.php';
+			$sw = new SPAW_Wysiwyg( 'content', '', '100%', '300px', false, "full" );
+			$sw->show();
+		?>
+		</td>
+	</tr>
+</table>
+
+<table width='90%' cellpadding='5' class='admintbl'>
+<colgroup><col width='100'><col></colgroup>
+	<tr class='admingray' align='center'>
+		<td><b>기본 항목명</b></td>
+		<td><b>항목내용</b></td>
+	</tr>
+<?
+for($i=1;$i<=10;$i++){
+	if(${_ETC_ADDED.$i}){
+?>
+	<tr class='adminwhite'>
+		<td class='adminleft'><?=${_ETC_ADDED.$i}?></td>
+		<td>
+			<textarea name='etc<?=$i?>' class='box' cols='100%'></textarea>
+		</td>
+	</tr>
+<?
+	}
+}
+?>
+</table>
+<table align='center'>
+	<tr>
+		<td>
+			<input type='submit' name='submit' value='등록' class='but blue pad5'>
+			<input type='reset' value='취소' class='but orange pad5'>
+			<input type='button' value='목록' class='but green pad5' onclick="self.location='<?=$_SERVER['PHP_SELF']?>?page=list'">
+		</td>
+	</tr>
+</form>
+</table>

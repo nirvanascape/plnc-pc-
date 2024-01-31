@@ -1,0 +1,9 @@
+<?php
+include $_SERVER['DOCUMENT_ROOT'].'/common/config.inc.php';
+
+$query = "DELETE FROM memberlevel WHERE level='".$_REQUEST[level]."'";
+$result = $objdb->sqlExe( $query );
+
+$url="/admin/member/index.html?page=level";
+$objfunc->goUrl($url);
+?>

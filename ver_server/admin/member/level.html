@@ -1,0 +1,167 @@
+<?php
+$query = "SELECT * FROM memberlevel ORDER BY level ASC";
+$result = $objdb->sqlResult( $query );
+$rowNum = $objdb->sqlNumRows( $query );
+$UseLevelArray = $objdb->sqlArrayOne( $query );
+
+$AddTitle = trim( $_POST['AddTitle'] );
+$AddLevel = $_POST['AddLevel'];
+$ModiTitle =  trim($_POST['ModiTitle']);
+$RealLevel = $_POST['RealLevel'];
+$ModLevel = $_POST['ModLevel'];
+
+$basic = $_POST['basic'];
+$BasicLevel = $_POST['BasicLevel'];
+
+if( isset($_POST['add']) && !empty($_POST['AddTitle']) )
+{
+	$sql = "INSERT INTO memberlevel VALUES('".$AddLevel."','".$AddTitle."','n')";
+	$rtn = $objdb->sqlExe( $sql );
+	if( $rtn )  $objfunc->alert('추가완료', false);
+	$objfunc->goUrl('/admin/member/index.html?page=level');
+}
+if ( isset($_POST['modi']) && !empty($ModiTitle) )
+{
+	$sql = "UPDATE memberlevel SET level='".$ModLevel."', levelname='".$ModiTitle."' WHERE level = '".$RealLevel."' ";
+	$rtn = $objdb->sqlExe( $sql );
+	if( $rtn )  $objfunc->alert('수정완료', false);
+	$objfunc->goUrl('/admin/member/index.html?page=level');
+}
+if ( isset($_POST['basic']) && !empty($_POST['BasicLevel']) )
+{
+	$sql = "UPDATE memberlevel SET basic='n'";
+	$objdb->sqlExe( $sql );
+	$SqlBasic = "UPDATE memberlevel SET basic='y' WHERE level='".$BasicLevel."' ";
+	$objdb->sqlExe( $SqlBasic );
+	$objfunc->goUrl('/admin/member/index.html?page=level');
+}
+?>
+
+<SCRIPT>
+function go_del( level ) {
+	if( !confirm( "삭제하시겠습니까?" ) ) return;
+	if( !confirm( "정말 삭제하시겠습니까?" ) ) return;
+
+	self.location = "/admin/member/leveldel.html?level="+level;
+}
+</SCRIPT>
+
+<TABLE width='90%'>
+	<TR>
+		<TD class='title'>회원등급 관리</TD>
+	</TR>
+</TABLE>
+
+<div class="dotbox">
+<ul>
+	<li>회원 등급은 5단계까지 추가하실 수 있으며, 회원 등급별로 게시판 읽기 및 쓰기 기능을 제한 할 수 있습니다.</li>
+</ul>
+</div>
+
+
+<TABLE width='80%'>
+	<TR>
+		<TD class='subtitle'>기본설정</TD>
+	</TR>
+</TABLE>
+<TABLE width='80%' class='admintbl' cellpadding='5'>
+<form name='basic' method='post' action='<?= $_SERVER["PHP_SELF"] ?>?page=level'>
+	<TR>
+		<TD class='adminleft' width='200'>회원가입시 기본회원등급</TD>
+		<TD class='adminwhite'>
+			<select name='BasicLevel' class='box'>
+				<option>미지정</option>
+			<? while ( $row = $objdb->sqlFetch($result) ) { ?>			
+				<option value='<?= $row[level]?>' <?= ( $row[basic]=='y'?'selected': '') ?>><?= $row[levelname]?></option>
+			<? } ?>
+			</select>
+		</TD>
+	</TR>
+</TABLE>
+<TABLE width='80%' cellpadding='5' border='0'>
+	<TR align='center'>
+		<TD>
+			<input type='submit' value='확인' class='but pad5 blue'>
+		</TD>
+	</TR>
+<input type='hidden' name='basic' value='basic'>
+</form>
+</TABLE>
+<TABLE width='80%'>
+	<TR>
+		<TD class='subtitle'>등급 추가</TD>
+	</TR>
+</TABLE>
+<TABLE width='80%' class='admintbl' cellpadding='5'>
+<form name='add' method='post' action='<?= $_SERVER["PHP_SELF"] ?>?page=level'>
+	<TR>
+		<TD class='admintitle'>등급</TD>
+		<TD class='admintitle'>등급명</TD>
+		<TD class='admintitle'>추가</TD>
+	</TR>
+<? if( $rowNum == 5 ) {?>
+	<TR>
+		<TD colspan='3' class='adminwhite' align='center'>모든등급 추가상태 입니다.</TD>
+	</TR>
+<? } else { ?>
+	<TR align='center'>
+		<TD class='adminwhite'>
+			<select name='AddLevel' class='box'>
+			<?	for( $i=2;$i<=5;$i++ ) {
+					if( !in_array($i, $UseLevelArray) ) {	?>
+					<option value='<?= $i ?>'><?= $i ?> 등급</option>
+				<? } ?>
+			<? } ?>
+			</select>		
+		</TD>
+		<TD class='adminwhite'>
+			<input type='text' name='AddTitle' maxlength='20' class='box'>
+		</TD>
+		<TD class='adminwhite'>
+			<input type='submit' value='추가' class='but pad3 orange'>
+		</TD>
+	</TR>
+<input type='hidden' name='add' value='add'>
+<? } ?>
+</form>
+</TABLE>
+<TABLE><TR><TD height='10'></TD></TR></TABLE>
+<TABLE width='80%'>
+	<TR>
+		<TD class='subtitle'>회원등급 관리</TD>
+	</TR>
+</TABLE>
+<TABLE width='80%' class='admintbl' cellpadding='3'>
+	<TR>
+		<TD class='admintitle'>등급</TD>
+		<TD class='admintitle'>등급명</TD>
+		<TD class='admintitle'>수정</TD>
+	</TR>
+<? 
+$result = $objdb->sqlResult( $query );
+while ( $row = $objdb->sqlFetch( $result ) ) { ?>
+<form name='modi' method='post' action='<?= $_SERVER["PHP_SELF"] ?>?page=level'>
+	<TR align='center'>
+		<TD class='adminwhite'>
+			<select name='ModLevel' class='box'>
+				<option value='<?= $row[level] ?>'><?= $row[level] ?> 등급</option>
+			<?	for($i=1;$i<=5;$i++){
+					if(!in_array($i, $UseLevelArray)){	?>
+					<option value='<?= $i ?>'><?= $i ?> 등급</option>
+				<?	} ?>
+			<?	} ?>
+			</select>		
+		</TD>
+		<TD class='adminwhite'>
+			<input type='text' name='ModiTitle' value='<?= $row[levelname] ?>' maxlength='20' class='box'>
+		</TD>
+		<TD class='adminwhite'>
+			<input type='submit' name='ModiLevel' value='수정' class='but orange'>
+			<input type='button' name='DelLevel' value='삭제' class='but red' onClick="go_del('<?= $row[level] ?>')">
+		</TD>
+	</TR>
+<input type='hidden' name='modi' value='modi'>
+<input type='hidden' name='RealLevel' value='<?= $row[level]?>'>
+</form>
+<? } ?>
+</TABLE>

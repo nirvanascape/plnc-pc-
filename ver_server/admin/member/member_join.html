@@ -1,0 +1,71 @@
+<?php
+$sql = "SELECT * FROM member_join";
+$row = $objdb->sqlRow( $sql );
+
+if( $_REQUEST[mode] == "modi" ) {
+	$sql = "UPDATE member_join SET jumin_use='".$_REQUEST[jumin_use]."', phone_use='".$_REQUEST[phone_use]."', hp_use='".$_REQUEST[hp_use]."', addr_use='".$_REQUEST[addr_use]."' ";
+	$rtn = $objdb->sqlExe( $sql );
+	$objfunc->reloadParent( "수정되었습니다" );
+}
+?>
+<TABLE width='90%'>
+	<TR>
+		<TD class='title'>가입항목설정</TD>
+	</TR>
+</TABLE>
+
+<div class="dotbox">
+<ul>
+	<li>회원가입시 입력 받는 항목의 필수 여부를 체크합니다.</li>
+</ul>
+</div>
+
+
+<TABLE class='admintbl' cellpadding='8' cellspacing='1'width='70%'>
+<form method='post' name='modi' target='exeFrame'>
+<input type='hidden' name='mode' value='modi'>
+	<TR class='admintitle'>
+		<TD>항목명</TD>
+		<TD>필수 / 선택</TD>
+	</TR>
+	<TR align='center'>
+		<TD class='adminleft'>주민등록번호</TD>
+		<TD class='adminwhite'>
+			<INPUT TYPE="radio" NAME="jumin_use" value='y' <?= ($row[jumin_use]=='y'?'checked':'')?>>
+				<font class="dgray">필수</font>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			<INPUT TYPE="radio" NAME="jumin_use" value='n' <?= ($row[jumin_use]=='n'?'checked':'')?>>선택
+		</TD>
+	</TR>
+	<TR align='center'>
+		<TD class='adminleft'>전화번호</TD>
+		<TD class='adminwhite'>
+			<INPUT TYPE="radio" NAME="phone_use" value='y' <?= ($row[phone_use]=='y'?'checked':'')?>>
+				<font class="dgray">필수</font>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			<INPUT TYPE="radio" NAME="phone_use" value='n' <?= ($row[phone_use]=='n'?'checked':'')?>>선택
+		</TD>
+	</TR>
+	<TR align='center'>
+		<TD class='adminleft'>핸드폰번호</TD>
+		<TD class='adminwhite'>
+			<INPUT TYPE="radio" NAME="hp_use" value='y' <?= ($row[hp_use]=='y'?'checked':'')?>>
+				<font class="dgray">필수</font>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			<INPUT TYPE="radio" NAME="hp_use" value='n' <?= ($row[hp_use]=='n'?'checked':'')?>>선택
+		</TD>
+	</TR>
+	<TR align='center'>
+		<TD class='adminleft'>주소</TD>
+		<TD class='adminwhite'>
+			<INPUT TYPE="radio" NAME="addr_use" value='y' <?= ($row[addr_use]=='y'?'checked':'')?>>
+				<font class="dgray">필수</font>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			<INPUT TYPE="radio" NAME="addr_use" value='n' <?= ($row[addr_use]=='n'?'checked':'')?>>선택
+		</TD>
+	</TR>
+</TABLE>
+<TABLE width='70%'>
+	<TR align='center'>
+		<TD>
+			<input type='submit' value='수정' class='but orange pad5'>
+		</TD>
+	</TR>
+</form>
+</TABLE>

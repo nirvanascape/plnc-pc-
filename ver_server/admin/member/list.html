@@ -1,0 +1,129 @@
+<?php
+$PageNo = $_REQUEST['PageNo'];
+$qrystring = "&PageSize=$_REQUEST[PageSize]".
+				"&search_word=$_REQUEST[search_word]".
+				"&field=$_REQUEST[field]";
+
+if ($_GET[field] == "SearchId") {
+	$add_sql = " WHERE id LIKE '%" .$_GET['search_word']. "%'"; 
+}
+else if ($_GET[field] == "SearchName") {
+	$add_sql = " WHERE name LIKE '%" .$_GET['search_word']. "%' ";
+}
+$sql = "SELECT COUNT(*) FROM member $add_sql";
+$TOTAL = $objdb->sqlRowOne( $sql );
+?>
+<SCRIPT>
+function go_del( id ) {
+	if( !confirm( "삭제하시겠습니까?" ) ) return;
+	if( !confirm( "정말 삭제하시겠습니까?" ) ) return;
+	self.location = "/admin/member/delete.html?page=list&PageNo=<?= $_REQUEST[PageNo] ?>&id="+id;
+}
+function go_member( id ) {
+	self.location = "/admin/member/index.html?page=info&PageNo=<?= $_REQUEST[PageNo] ?><?= $qrystring ?>&id="+id;
+}
+</SCRIPT>
+
+<div class='title'>회원 관리</div>
+
+<div class="dotbox">
+<ul>
+	<li>회원은 [회원등급 관리]에서 등급을 5단계까지 설정하실 수 있습니다.</li>
+</ul>
+</div>
+
+
+<TABLE width='90%'>
+	<TR>
+		<TD class='bold'>총 <font class='red'><?= $TOTAL ?></font> 명의 회원</TD>
+	</TR>
+</TABLE>
+<TABLE width='90%' class='admintbl' cellpadding='7'>
+	<TR class='admintitle'>
+		<TD>번호</TD>
+		<TD>아이디</TD>
+		<TD>이름</TD>
+		<TD>이메일</TD>
+		<TD>휴대폰</TD>
+		<TD>등급</TD>
+		<TD>기능</TD>
+	</TR>
+<?
+if( empty( $PageSize ) ) $PageSize = 10;
+if( empty( $PageNo ) ) $PageNo = 1;
+$START = $objfunc->getDbStartNo( $PageNo, $PageSize );
+
+$sql = "SELECT * FROM member $add_sql ORDER BY wdate DESC LIMIT $START, $PageSize";
+$result = $objdb->sqlResult($sql);
+$no = $TOTAL - $START;
+$j = 0;
+
+while( $row = $objdb->sqlFetch($result) ) { 
+$sql = "SELECT levelname FROM memberlevel WHERE level = '".$row[level]."'";
+$levelName = $objdb->sqlRowOne( $sql );
+?>
+	<TR class='adminwhite' align='center'>
+		<TD><?= $no ?></TD>
+		<TD><?= $row[id]?></TD>
+		<TD><?= $row[name]?></TD>
+		<TD><?= $row[email]?></TD>
+		<TD><?= $row[hp]?></TD>
+		<TD><?= ($levelName==null?'미지정':"$levelName") ?></TD>
+		<TD width='80'>
+			<input type='button' value='상세' class='but orange' onClick="go_member('<?= $row[id] ?>');">
+			<input type='button' value='삭제' class='but red' onClick="go_del('<?= $row[id] ?>');">
+		</TD>
+	</TR>
+<?
+$no--;
+$j++;
+}
+if ( $j == 0 ) { 
+	$objfunc->backPaging( $qrystring );
+?>
+	<TR class='adminwhite'>
+		<TD colspan='7' align='center'>가입한 회원이 없습니다.</TD>
+	</TR>
+<? } ?>
+</TABLE>
+
+<TABLE border=0 cellpadding=0 cellspacing=0 width="90%">
+	<TR>
+		<TD align="center">
+
+<TABLE border=0 cellpadding=0 cellspacing=0 width="90%">
+	<TR height="40">
+		<TD align="center">
+		<!-- paging -->
+			<? $objfunc->adminPaging2( $PageNo, $PageSize, $TOTAL, '', $qrystring ); ?>
+		<!-- //paging -->
+		</TD>
+	</TR>
+</TABLE>
+
+<!-- search -->
+<TABLE border=0 cellpadding=3 cellspacing=0>
+<form name='search' method='GET' action="/admin/member/index.html?page=list<?= $qrystring ?>">
+<input type='hidden' name='page' value='list'>
+	<TR>
+		<TD>
+			<SELECT NAME='field' class='box'>
+				<OPTION VALUE="SearchId" <?if($_GET[field] == SearchId)echo "selected"?>>아이디</option>
+				<OPTION VALUE="SearchName" <?if($_GET[field] == SearchName)echo "selected"?>>이름</option>
+			</SELECT>
+		</TD>
+		<TD width='5'></TD>
+		<TD style="padding:2px">
+			<INPUT TYPE="text" NAME="search_word" class="box" style="width:100px" value="<?=$search_word?>">
+		</TD>
+		<TD width='5'></TD>
+		<TD><input type="submit" class='but blue pad5' value='검색'></TD>
+	</TR>
+	<input type='hidden' name='page' value='<?= $page_info ?>'>
+</form>
+</TABLE>
+
+		</TD>
+	</TR>
+</TABLE>
+<!-- //search -->

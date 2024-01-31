@@ -1,0 +1,39 @@
+<table width='90%'>
+	<tr>
+		<td class='title alignleft'>팝업 관리</td>
+	</tr>
+</table>
+<table width='90%' class='admintbl' cellpadding='5'>
+<colgroup><col width='100'><col></colgroup>
+	<tr>
+		<td class='adminleft'>팝업사용여부</td>
+		<td class='adminwhite alignleft'>
+			<input type='radio' name='chkuse' value='y'>사용
+			<input type='radio' name='chkuse' value='n'>미사용
+		</td>
+	</tr>
+	<tr>
+		<td class='adminleft'>팝업창 제목</td>
+		<td class='adminwhite alignleft'>
+			<input type='text' name='poptitle' size='35' maxlength='30' class='box'>			
+		</td>
+	</tr>
+	<tr>
+		<td class='adminleft'>내용</td>
+		<td class='adminwhite alignleft'>
+			<input type='hidden' name='chkhtml' value='y'>
+		<?php
+			include $_SERVER['DOCUMENT_ROOT'].'/common/new_editor/spaw_control.class.php';
+			$sw = new SPAW_Wysiwyg( 'contents' );
+			$sw->show();
+		?>	
+		</td>
+</table>
+<table><tr><td></td></tr></table>
+<table>
+	<tr>
+		<td>
+			<input type='submit' value='확인' class='but blue pad5'>
+		</td>
+	</tr>
+</table>

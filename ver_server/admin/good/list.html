@@ -1,0 +1,345 @@
+<?
+$PageNo = $_REQUEST['PageNo'];
+$qrystring = "&PageSize=".$_REQUEST[PageSize].
+				"&page=".$_REQUEST[page].
+				"&qrystring=".$_REQUEST[qrystring].
+				"";
+
+$sql = "SELECT * FROM category ORDER BY ca_group DESC , ca_step, ca_top";
+$ca_array = $objdb->sqlArray($sql);
+if($ca_array){
+	foreach($ca_array as $ca){
+		if( $ca[ca_step]==2 )		$scate[$ca[ca_group]][$ca[ca_parent]][] = $ca;
+		else if( $ca[ca_step]==1 )	$mcate[$ca[ca_group]][] = $ca;
+		else						$lcate[] = $ca;
+	}
+}
+
+if( $_REQUEST[mode]=="search" ){
+	if( $_REQUEST[goodkind] ) $QRY[] = $_REQUEST[goodkind]."='y'";
+
+	if( $_REQUEST[keyword] && $_REQUEST[search_part] ){
+		$QRY[] = $_REQUEST[search_part]." LIKE '%".$_REQUEST[keyword]."%'";
+	}
+
+	if($_GET['smallno']){
+		$ca_code_array[] = $_GET['smallno'];
+	}
+	else if($_GET['middleno']){
+		$ca_code_array[] = $_GET['middleno'];
+		if($scate[$_GET['largeno']][$_GET['middleno']]){
+			foreach($scate[$_GET['largeno']][$_GET['middleno']] as $v){
+				$ca_code_array[] = $v[ca_code];
+			}
+		}
+	}
+	else if($_GET['largeno']){
+		$ca_code_array[] = $_GET['largeno'];
+		if($mcate[$_GET['largeno']]){
+			foreach($mcate[$_GET['largeno']] as $v){
+				$ca_code_array[] = $v[ca_code];
+				if($scate[$_GET['largeno']][$v[ca_code]]){
+					foreach($scate[$_GET['largeno']][$v[ca_code]] as $v2){
+						$ca_code_array[] = $v2[ca_code];
+					}
+				}
+			}
+		}
+	}
+	
+	if($ca_code_array){
+		$QRY[] = "ca_code IN (".arr2in($ca_code_array).")";
+	}
+}
+
+if( $_POST[mode]=="reload" ){
+
+	$code = $_POST[listnum];
+
+	$sql = "UPDATE good SET chknew='".$_POST[chknew][$code]."', chkpop='".$_POST[chkpop][$code]."', chkrec='".$_POST[chkrec][$code]."' , chkuse='".$_POST[chkuse][$code]."' WHERE code='".$code."'";
+	$objdb->sqlExe($sql);
+
+	$objfunc->reloadParent('변경 되었습니다.');
+}
+
+if( $_POST[mode]=="goodsDelete" ){
+
+	$savedir = $_SERVER["DOCUMENT_ROOT"]."/good_image/";
+	$code = $_POST[listnum];
+
+	$sql = "SELECT smallimg1, middleimg1, smallimg2, middleimg2, smallimg3, middleimg3, smallimg4, middleimg4, smallimg5, middleimg5 FROM good WHERE code='".$code."'";
+	$row = $objdb->sqlRow($sql);
+
+	if( $row[middleimg1] )						$objfile->deleteFile( $savedir.$row[middleimg1] );
+	if( $row[smallimg1] )						$objfile->deleteFile( $savedir.$row[smallimg1] );
+	if( $row[middleimg2] )						$objfile->deleteFile( $savedir.$row[middleimg2] );
+	if( $row[smallimg2] )						$objfile->deleteFile( $savedir.$row[smallimg2] );
+	if( $row[middleimg3] )						$objfile->deleteFile( $savedir.$row[middleimg3] );
+	if( $row[smallimg3] )						$objfile->deleteFile( $savedir.$row[smallimg3] );
+	if( $row[middleimg4] )						$objfile->deleteFile( $savedir.$row[middleimg4] );
+	if( $row[smallimg4] )						$objfile->deleteFile( $savedir.$row[smallimg4] );
+	if( $row[middleimg5] )						$objfile->deleteFile( $savedir.$row[middleimg5] );
+	if( $row[smallimg5] )						$objfile->deleteFile( $savedir.$row[smallimg5] );
+
+	$sql = "DELETE FROM good WHERE code='".$code."'";
+	$objdb->sqlExe($sql);
+
+	$objfunc->reloadParent('삭제 되었습니다.');
+}
+
+$WHEREQRY = "";
+if( count($QRY) ) $WHEREQRY = "WHERE ".implode( " AND ", $QRY );
+
+if( empty( $PageSize ) ) $PageSize = 10;
+if( empty( $PageNo ) ) $PageNo = 1;
+$START = $objfunc->getDbStartNo( $PageNo, $PageSize );
+
+$sql="SELECT count(*) FROM good $WHEREQRY";
+$TOTAL = $objdb->sqlRowOne($sql);
+?>
+<script>
+
+function goodDelete( form, code ) {
+	if( confirm( "정말 삭제하시겠습니까?" ) ) {
+		form.listnum.value	=	code;
+		form.mode.value = "goodsDelete";
+		form.submit();
+	}
+}
+
+function goodsModify( code ) {
+	var f = goodListForm;
+	f.listnum.value	=	code;
+	f.submit();
+}
+
+function largeno_change( div, val ) {
+<?
+	echo "div.length = 1;\n";
+	echo "div.options[0].value = '0';\n";
+	echo "div.options[0].text = '++ 중분류 선택 ++';\n";
+	foreach( $lcate as $k1 => $v1 ) {
+		echo "if( '".$v1[ca_group]."' == val ) {\n";
+		echo "div.length = ".( count( $mcate[$v1[ca_group]] ) + 1 ).";\n";
+		echo "div.options[0].value = '0';\n";
+		echo "div.options[0].text = '++ 중분류 선택 ++';\n";
+		if($mcate[$v1[ca_group]]){
+			foreach( $mcate[$v1[ca_group]] as $k2 => $v2 ) {
+				$v2[title] = strip_tags( $v2[title] );
+				echo "div.options[".( $k2 + 1 )."].value = '".$v2[ca_code]."';\n";
+				echo "div.options[".( $k2 + 1 )."].text = '".addslashes($v2[ca_title])."';\n";
+			}
+		}
+		echo "return;\n";
+		echo "}\n";
+	}
+
+?>
+}
+
+function middleno_change( div, val, ca_parent ) {
+<?
+	echo "div.length = 1;\n";
+	echo "div.options[0].value = '0';\n";
+	echo "div.options[0].text = '++ 소분류 선택 ++';\n";
+
+	foreach( $lcate as $k1 => $v1 ) {
+		if($mcate[$v1[ca_group]]){
+			foreach( $mcate[$v1[ca_group]] as $k2 => $v2 ) {
+
+				if($scate[$v2[ca_group]][$v2[ca_code]]){
+					echo "if( '".$v2[ca_parent]."' == ca_parent && '".$v2[ca_code]."' == val ) {\n";
+					echo "div.length = ".( count( $scate[$v2[ca_group]][$v2[ca_code]] ) + 1 ).";\n";
+					echo "div.options[0].value = '0';\n";
+					echo "div.options[0].text = '++ 소분류 선택 ++';\n";
+					if($scate[$v2[ca_group]][$v2[ca_code]]){
+						foreach( $scate[$v2[ca_group]][$v2[ca_code]] as $k3 => $v3 ) {
+							$v3[title] = strip_tags( $v3[title] );
+							echo "div.options[".( $k3 + 1 )."].value = '".$v3[ca_code]."';\n";
+							echo "div.options[".( $k3 + 1 )."].text = '".addslashes($v3[ca_title])."';\n";
+						}
+					}
+					echo "return;\n";
+					echo "}\n";
+				}
+			}
+		}
+		echo "\n";
+	}
+?>
+}
+</script>
+
+<table width='90%'>
+	<tr>
+		<td class='title'>상품 관리</td>
+	</tr>
+</table>
+
+<div class="dotbox">
+<ul>
+	<li>상품명을 클릭하시면 해당 상품 등록정보를 확인 및 수정하실 수 있습니다.</li>
+</ul>
+</div>
+
+<form name="searchForm">
+<TABLE border=0 cellpadding=5 cellspacing=1 width=90% class="admintbl tblfix" align='center'>
+<tr class="adminwhite" align='center'>
+  <td class="adminleft" width="20%">상품분류</td>
+  <td style="text-align:left">
+			<select name='largeno' class='box' onchange="largeno_change( searchForm.middleno, this.value );middleno_change(searchForm.smallno, searchForm.middleno.options[searchForm.middleno.selectedIndex].value, this.value);">
+				<option value='0'>++ 대분류 선택 ++</option>
+<?
+foreach($lcate as $lval){
+?>
+				<option value="<?=$lval[ca_code]?>" <?=($_REQUEST['largeno']==$lval[ca_code]?'selected':'')?>><?=$lval[ca_title]?></option>
+<?}?>
+			</select>
+			<select name='middleno' class='box' onchange="middleno_change( searchForm.smallno, this.value, searchForm.largeno.value );">
+				<option value="">++ 중분류 선택 ++</option>
+<?
+if($_REQUEST['largeno']){
+	foreach($mcate[$_REQUEST['largeno']] as $mval){
+?>
+				<option value="<?=$mval[ca_code]?>" <?=($_REQUEST['middleno']==$mval[ca_code]?'selected':'')?>><?=$mval[ca_title]?></option>
+<?
+	}
+}
+?>
+			</select>
+			<select name='smallno' class='box'>
+				<option value="">++ 소분류 선택 ++</option>
+<?
+if($_REQUEST['middleno']){
+	foreach($scate[$_REQUEST['largeno']][$_REQUEST['middleno']] as $sval){
+?>
+				<option value="<?=$sval[ca_code]?>" <?=($_REQUEST['smallno']==$sval[ca_code]?'selected':'')?>><?=$sval[ca_title]?></option>
+<?
+	}
+}
+?>
+			</select>
+  </td>
+  <td rowspan="3" width="20%"><input type="image" src="/img/goods/search.jpg"></td>
+ </tr>
+ <tr class="adminwhite" align='center'>
+  <td class="adminleft" width="20%">상품종류</td>
+  <td style="text-align:left">
+	<select name="goodkind" class="box fullwidth">
+	<option value="">++ 전체상품 ++</option>
+	<option value="chknew" <?if($_REQUEST[goodkind]=="chknew") echo "selected";?>>신상품</option>
+	<option value="chkpop" <?if($_REQUEST[goodkind]=="chkpop") echo "selected";?>>인기상품</option>
+	<option value="chkrec" <?if($_REQUEST[goodkind]=="chkrec") echo "selected";?>>추천상품</option>
+	</select>
+  </td>
+</tr>
+<tr class="adminwhite" align='center'>
+  <td class="adminleft" width="20%">항목검색</td>
+  <td style="text-align:left">
+	<table border=0 cellpadding=0 cellspacing=0 width=100%>
+	<tr>
+	<td width="1%">
+		<select name="search_part">
+		<!-- <option value="">++ 검색영역 ++</option> -->
+		<option value="name" <?if($_REQUEST[search_part]=="name" || !$_REQUEST[search_part]) echo "selected";?>>상품명</option>
+		<option value="summary" <?if($_REQUEST[search_part]=="summary") echo "selected";?>>상품개요</option>
+		<option value="content" <?if($_REQUEST[search_part]=="content") echo "selected";?>>상품설명</option>
+		</select>
+	</td>
+	<td><input type="text" name="keyword" value="<?=$_REQUEST[keyword]?>" class="box withsel fullwidth"></td>
+	</tr>
+	</table>
+  </td>
+</tr>
+</TABLE>
+<input type="hidden" name="mode" value="search">
+<input type="hidden" name="page" value="<?=$_REQUEST[page]?>">
+<input type="hidden" name="PageSize" value="<?=$_REQUEST[PageSize]?>">
+</form>
+
+<form name="goodListForm" method="post" target="exeFrame" onSubmit="return false;">
+
+<table border=0 cellpadding=5 cellspacing=0 width=90% align='center'>
+<tr><td style="text-align:left"><b>총 <font color="9e0039"><?=$TOTAL?></font>개의 상품</b></td></tr>
+</table>
+
+<table width='90%' class='admintbl' cellpadding='5' align='center'>
+	<tr class='admintitle'>
+		<td>상품</td>
+		<td>카테고리</td>
+		<td>상품명</td>
+		<td>상품정보</td>
+		<td>관리</td>
+	</tr>
+<?
+$sql="SELECT code, smallimg1, ca_code, chknew, chkpop, chkrec, name,chkuse FROM good $WHEREQRY ORDER BY wdate DESC LIMIT $START, $PageSize";
+$result = $objdb->sqlResult($sql);
+while($row=$objdb->sqlFetch($result)){
+
+	$sql = "select ca_title, ca_group, ca_step , ca_parent from category where ca_code='".$row[ca_code]."'";
+	$cateG = $objdb->sqlRow($sql);
+	$sql = "select ca_title, ca_step from category where ca_group='".$cateG[ca_group]."' and ca_step < '".$cateG[ca_step]."' and (ca_code='".$cateG[ca_parent]."' or ca_parent='0') order by ca_step";
+	$cateBM = $objdb->sqlArray($sql);
+?>
+	<tr class="adminwhite" align='center'>
+		<td nowrap><img src="/good_image/<?=$row[smallimg1]?>" width="40" height="40"></td>
+		<td nowrap>
+			<TABLE border=0 cellpadding=0 cellspacing=0 width=90%>
+			<TR>
+
+				<TD>
+				<?
+				if($cateG[ca_step]=="2"){
+					echo "<img src='/img/goods/big.jpg'><br><img src='/img/goods/middle.jpg'><br><img src='/img/goods/small.jpg'>";
+				}else if($cateG[ca_step]=="1"){
+					echo "<img src='/img/goods/big.jpg'><br><img src='/img/goods/middle.jpg'>";
+				}else{
+					echo "<img src='/img/goods/big.jpg'>";
+				}
+				?>
+				</TD>
+
+				<TD nowrap class="small" style="text-align:left">
+				<?
+				if($cateG[ca_step] != 0){
+					foreach($cateBM as $k => $v){
+						echo $v[ca_title]."<br>";
+					}
+				}
+				echo $cateG[ca_title];		
+				?>
+				</TD>
+			</TR>
+			</TABLE>
+		</td>
+		<td style='word-break:break-all'><a href='?page=modify&code=<?=$row[code]?>'><?=$objfunc->htmlText($row[name])?></a></td>
+		<td nowrap>
+			<TABLE border=0 cellpadding=0 cellspacing=0 width=80% class="mil">
+			<TR>
+				<TD nowrap>
+					<input type='checkbox' name='chknew[<?=$row[code]?>]' value='y' <?=($row[chknew]=='y'?'checked':'')?>>신
+					<input type='checkbox' name='chkpop[<?=$row[code]?>]' value='y' <?=($row[chkpop]=='y'?'checked':'')?>>인기
+					<input type='checkbox' name='chkrec[<?=$row[code]?>]' value='y' <?=($row[chkrec]=='y'?'checked':'')?>>추천
+					<input type='checkbox' name='chkuse[<?=$row[code]?>]' value='y' <?=($row[chkuse]=='y'?'checked':'')?>>전시
+				</td>
+			</tr>
+			</table>
+		</td>
+		<td nowrap>
+			<img src="/img/goods/but_change.gif" width=32 height=18 hspace=1 align=absmiddle class=hand onClick="javascript:goodsModify('<?=$row[code]?>');"> <a href="?page=modify&code=<?=$row[code]?>"><img src="/img/goods/ico_modi.gif" width=32 height=18 hspace=1 align=absmiddle class=hand  border="0"></a> <a href="javascript:goodDelete( goodListForm, '<?=$row[code]?>' );"><img src="/img/goods/ico_del.gif" width=32 height=18 hspace=1 align=absmiddle class=hand border="0"></a>
+		</td>
+	</tr>
+<?}?>
+</table>
+<input type="hidden" name="listnum" value="">
+<input type="hidden" name="mode" value="reload">
+</form>
+<TABLE border=0 cellpadding=0 cellspacing=0 width="90%" align='center'>
+	<TR height="40" align='center'>
+		<TD>
+		<!-- paging -->
+<? $objfunc->adminPaging2( $PageNo, $PageSize, $TOTAL, '', $qrystring ) ?>
+		<!-- //paging -->
+		</TD>
+	</tr>
+</table>

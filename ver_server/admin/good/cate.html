@@ -1,0 +1,232 @@
+<?php
+include $_SERVER["DOCUMENT_ROOT"]."/config/category.conf.php";
+
+if( $_POST[mode] == "reload" ){
+	$filename = $_SERVER["DOCUMENT_ROOT"]."/config/category.conf.php";
+	$config_file = phpcode_str('cateUse');
+	$objfile->fileWrite( $filename, $config_file );
+	updateConfig( "category.conf.php", $config_file );
+
+	$objfunc->reloadParent();
+}
+//새로운 카테고리 추가
+else if( $_POST[mode] == 'cateInsert' ) {
+
+	$cateTitle = trim($_REQUEST['cateTitle']);
+
+	$sql = "INSERT INTO category VALUES ( NULL, '".$cateTitle."', '', 0, 0, 0, 0 )";
+	$exeSql = $objdb->sqlExe($sql);
+
+	if( $exeSql ) {
+
+		$cateCode = mysql_insert_id();
+		$sql = "UPDATE category SET ca_group ='".$cateCode."' WHERE ca_code='".$cateCode."'";
+		$objdb->sqlExe($sql);
+		$objfunc->reloadParent('카테고리가 추가되었습니다.');
+	}
+	else {
+		$objfunc->reloadParent('카테고리 추가실패');
+	}
+
+}
+//카테고리 이름 수정
+else if( $_POST[mode] == 'titleModi') {
+
+	$cateCode = $_REQUEST['modeCateCode'];
+	$modiCateTitle = trim($_REQUEST['modiTitle'.$cateCode]);
+	
+	$sql = "UPDATE category SET ca_title = '".$modiCateTitle."' WHERE ca_code='".$cateCode."'";
+	$exeSql = $objdb->sqlExe($sql);
+	$objfunc->reloadParent('변경 완료');
+}
+//카테고리 삭제
+else if( $_POST[mode] == 'cateDel' ) {
+
+	$cateCode = $_REQUEST['modeCateCode'];
+
+	$sql = "SELECT ca_code FROM category WHERE ca_parent=".$cateCode."";
+	$result = $objdb->sqlResult($sql);
+
+	if( $result ) {
+		while($row=$objdb->sqlFetch($result)){
+			$sql = "DELETE FROM category WHERE ca_parent in(".$row[ca_code].")";
+			$exeSql = $objdb->sqlExe($sql);
+		}
+	}
+	
+	$sqlOne = "DELETE FROM category WHERE ca_parent in(".$cateCode.")";
+	$sqlTwo = "DELETE FROM category WHERE ca_code='".$cateCode."'";
+	
+	$exeSql = $objdb->sqlExe($sqlOne);
+	$exeSql = $objdb->sqlExe($sqlTwo);
+	
+	$objfunc->reloadParent();
+
+}
+?>
+
+
+
+<SCRIPT>
+
+function go_write(form) {
+	if( form.cateTitle.value == '' || form.cateTitle.value == null ) {
+		alert('카테고리 이름을 입력하세요');
+		form.cateTitle.focus();
+		return;
+	}
+	form.submit();
+}
+
+function go_modi(code) {
+	var form = document.cateInsert;
+	var formTitle = "modiTitle"+code;
+	obj = document.getElementById('modiTitle'+code);
+
+	if( obj.value == '' || obj.value == null ) {
+		alert('수정 카테고리 이름을 입력하세요');
+		obj.focus();
+		return;
+	}
+
+	form.mode.value = 'titleModi';
+	form.modeCateCode.value = code;
+	form.submit();
+}
+
+function go_del(code, parentNum) {
+	var form = document.cateInsert;
+	
+	if( !confirm( "삭제하시겠습니까?" ) ) return;
+
+	if( parentNum != 0 ){
+		if( !confirm( "하부 카테고리도 삭제 됩니다. 삭제하시겠습니까?" ) ) return;
+	}
+
+	form.mode.value = 'cateDel';
+	form.modeCateCode.value = code;
+	form.submit();
+}
+
+</SCRIPT>
+
+
+
+<TABLE border='0' width='90%'>
+	<TR>
+		<TD class='title'>카테고리 관리</TD>
+	</TR>
+</TABLE>
+
+<div class="dotbox">
+<ul>
+	<li>카테고리 분류 없이 소수의 상품만 등록하여 메뉴를 구성할 경우 "<B>카테고리 사용여부</B>"를 반드시 "<font class="bold red">미사용</font>"으로 선택해 주셔야 합니다.</li>
+</ul>
+</div>
+
+<TABLE border='0' width='90%'>
+	<TR>
+		<TD>
+<FORM name="cateChk" method="post"  enctype="multipart/form-data" target="exeFrame">
+<input type="hidden" name="mode" value="reload">
+	<TABLE class='admintbl' cellpadding='5' border="0">
+		<TR>
+			<TD class='adminleft' width='120'>카테고리 사용여부</TD>
+			<TD class='adminwhite'>
+				<input type='radio' name='cateUse' value='y' <?if($_cateUse == 'y') echo "checked";?>>사용
+				<input type='radio' name='cateUse' value='n' <?if($_cateUse == 'n') echo "checked";?>>미사용
+			</TD>
+			<TD class='adminwhite' align='center'>
+				<input type="submit" value="확인" class='but pad3 orange'>
+			</TD>
+		</TR>
+	</TABLE><br>
+</FORM>
+<?if($_cateUse == 'y'){?>
+	<TABLE><TR><TD></TD></TR></TABLE>
+
+	<TABLE class='admintbl' width='60%' cellpadding='5' align='center'>
+	<FORM name="cateInsert" method="post" target="exeFrame">
+		
+		<input type='hidden' name='mode' value='cateInsert'>
+		<input type='hidden' name='modeCateCode' value=''>
+		<TR class='admintitle'>
+			<TD colspan=2>카테고리</TD>	
+		</TR>
+		<?php
+		$sql = "SELECT * FROM category ORDER BY ca_group , ca_step, ca_top desc";
+		$result= $objdb->sqlResult( $sql );
+
+		while ($row = $objdb-> sqlFetch ($result) )
+		{
+			$ca_group = $row[ca_group];
+			$ca_code = $row[ca_code];
+			$ca_title = $row[ca_title];
+			$ca_parent = $row[ca_parent];
+			if(!$ca_title){
+				$ca_title="[NO Title]";
+			}
+			$ca_step = $row[ca_step];
+			switch ($ca_step) {
+				case '0' :
+					$ca_level = '(大)';
+					break;
+				case '1' :
+					$ca_level = '(中)';
+					break;
+				case '2' :
+					$ca_level = '(小)';
+					break;
+				}
+		?>
+    	<TR>
+<?
+				if( $ca_step ){
+						for($i=0; $i<$ca_step; $i++){
+//						print "&nbsp;&nbsp;&nbsp;&nbsp;";
+						
+					}
+				}
+				$sql = "SELECT * FROM category WHERE ca_parent IN(".$ca_code.") ";
+				$parentNum = $objdb->sqlNumrows($sql);
+			?>				
+
+			<TD class='adminwhite' style='padding-left:<?=$ca_step*50?>px'>
+			<?
+			if( $ca_step != 2 ){	
+			?>
+				<a href="/admin/good/index.html?page=cateAdd&<? $objfunc->nexti($ca_code,$ca_step,$ca_group,$ca_parent)?>" class='linkmenu'>
+				<font color='gray'>&nbsp;<?= $ca_level ?></font>
+				<?= $ca_title ?>
+				</a>
+			<?
+			}
+			else {
+			?>
+				<font color='gray'><b><?= $ca_level ?></b></font><font color='#336699'><b><?= $ca_title ?></b></font>
+			<? } ?>
+
+
+
+			</TD>
+			<TD class='adminwhite' width='300'>
+				<input type='text' name='modiTitle<?=$ca_code?>' size=30 maxlength=30 class='box' value='<?= $ca_title?>'>
+				<a href="javascript:go_modi('<?=$ca_code?>');"><img src='/admin/img/but_change.gif'></a>
+				<a href="javascript:go_del('<?=$ca_code?>','<?=$parentNum?>');"><img src='/admin/img/ico_del2.gif'></a>
+
+			</TD>
+			</TR>
+		<?	$j--; ?>
+	<? } ?>   
+	    <TR>
+			<TD colspan=6 class='adminleft' align='center' style='text-align:center;'><b>대분류 카테고리 추가</b>&nbsp; 
+				<input type='text' name='cateTitle' size=30 maxlength=30 class='box'>
+				<input type='button' value='추가' class='but blue' onClick='go_write(this.form);'>
+			</TD>	
+		</TR>
+	</FORM>	
+	</TABLE>
+<?}?>
+</TD>
+	</TR>
+</TABLE> 

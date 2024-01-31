@@ -1,0 +1,115 @@
+<?php
+$ca_code = $_REQUEST['ca_code'];
+$ca_step = $_REQUEST['ca_step'];
+$ca_group = $_REQUEST['ca_group'];
+$ca_parent = $_REQUEST['ca_parent'];
+$sql = "SELECT * FROM category";
+$cateArr = $objdb->sqlArray($sql);
+foreach($cateArr as $k => $v){
+	if($v[ca_step]=='2'){
+		$scate[$v[ca_group]][$v[ca_parent]][] = $v;
+	}
+	else if($v[ca_step]=='1'){
+		$mcate[$v[ca_group]][] = $v;
+	}
+	else{
+		$lcate[] = $v;
+	}
+}
+
+if($ca_step == '2'){
+	foreach($scate[$ca_group][$ca_parent] as $sval){
+		if($sval[ca_code] == $ca_code){
+			$stitle = $sval[ca_title];
+		}
+	}
+	$mcode = $ca_parent;
+	$lcode = $ca_group;
+}
+else if($ca_step=='1'){
+	$mcode = $ca_code;
+	$lcode = $ca_group;
+}
+else{
+	$lcode = $ca_code;
+}
+
+if($mcode){
+	foreach($mcate[$ca_group] as $mval){
+		if($mval[ca_code] == $mcode){
+			$mtitle = $mval[ca_title];
+		}
+	}
+}
+
+foreach($lcate as $lval){
+	if($lval[ca_code] == $lcode){
+		$ltitle = $lval[ca_title];
+	}
+}
+
+if( !empty($stitle) ){
+	$title = $stitle;
+	$ca_info = '<b>대분류</b> => '.$ltitle.'<br><b>중분류</b> => '.$mtitle.'<br> <b><font color=blue>소분류</font></b> => '.$stitle;
+} else if( !empty($mtitle) && empty($stitle) ){
+	$title = $mtitle;
+	$ca_info = '<b>대분류</b> => '.$ltitle.'<br><b><font color=blue>중분류</font></b> => '.$mtitle;
+} else {
+	$title = $ltitle;
+	$ca_info = '<b><font color=blue>대분류</font></b> => '.$ltitle;
+}
+?>
+<SCRIPT>
+function go_modi() {
+	self.location = '/admin/good/index.html?page=catewrite&ca_code=<?=$ca_code?>&mode=modify&ca_step=<?= $ca_step ?>&ca_group=<?= $ca_group?>&ca_parent=<?= $ca_parent?>';
+}
+function go_subinsert() {
+	self.location = '/admin/good/index.html?page=catewrite&ca_code=<?=$ca_code?>&mode=reply';
+}
+function go_del() {
+	if( !confirm( "삭제하시겠습니까?" ) ) return;
+	self.location = '/admin/good/index.html?page=cateinsert&ca_code=<?=$ca_code?>&mode=del';
+}
+function go_insert() {
+	self.location = '/admin/good/index.html?page=catewrite';
+}
+function go_list(){
+	self.location = '/admin/good/index.html?page=cate';
+}
+</SCRIPT>
+<TABLE width='90%' border='0'>
+	<TR>
+		<TD class='title'>카테고리 관리</TD>
+	</TR>
+ <TR>
+  <TD>
+  
+	<TABLE width="80%" class='admintbl' cellpadding='10' align='center'>
+	<colgroup><col width='100'><col></colgroup>
+		<TR>
+			<TD colspan='2' class='admintitle'>카테고리 설명</TD>
+		</TR>
+    	<TR>
+			<TD class='adminleft'>카테고리 정보</TD>
+			<TD class='adminwhite'><?= $ca_info?></TD>
+		</TR>
+		<TR>
+			<TD class='adminleft'>카테고리 명</TD>
+			<TD class='adminwhite'><?= $title?> </TD>
+		</TR>
+		<TR>
+			<TD colspan='2' class='adminwhite' align='center'>
+				<input type='button' value='수정' class='but pad3 orange' onClick='go_modi();'>
+				<? if( empty($stitle) ){ ?>
+					<input type='button' value='하부메뉴생성' class='but pad3 blue' onClick='go_subinsert();'>
+				<? } ?>
+				<input type='button' value='삭제' class='but pad3 red' onClick='go_del();'>
+				<!-- <input type='button' value='새로운 카테고리 추가' class='but pad3' onClick='go_insert();'> -->
+				<input type='button' value='리스트' class='but pad3' onClick='go_list();'>
+			</TD>
+		</TR>
+    </TABLE>
+
+  </TD>
+ </TR>
+</TABLE>
