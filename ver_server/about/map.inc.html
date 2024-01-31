@@ -1,0 +1,50 @@
+<?php
+	$sql = "SELECT * FROM authorised_user";
+	$row = $objdb->sqlRow( $sql );
+?>
+<div style="margin-top:30px">
+   <!-- <img src="/img/about/map_img2018.jpg"> -->
+   <div id="map" style="width: 100%; height: 360px"> </div> 
+</div>
+<!--<TABLE border="0" cellpadding="0" cellspacing="0" id="mapinfo">
+<TR>
+	<TH>주소</TH>
+	<TD><?= $row[addr]?></TD>
+</TR>
+<TR>
+	<TH>연락처</TH>
+	<TD>TEL : <font class="b fc01"><?= $row[phone]?></font>&nbsp;&nbsp;/&nbsp;&nbsp;FAX : <?= $row[fax]?></TD>
+</TR>
+<TR>
+	<TH>오시는 방법</TH>
+	<TD><?= nl2br($row[map])?></TD>
+</TR>
+</TABLE>-->
+
+<TABLE border="0" cellpadding="0" cellspacing="0" id="mapinfo">
+<TR>
+	<TH>주소</TH>
+	<TD>서울특별시 구로구 디지털로 272 한신IT타워 209호</TD>
+</TR>
+<TR>
+	<TH>연락처</TH>
+	<TD>TEL : <font class="b fc01"><?= $row[phone]?></font>&nbsp;&nbsp;/&nbsp;&nbsp;FAX : <?= $row[fax]?></TD>
+</TR>
+<TR>
+	<TH>오시는 방법</TH>
+	<TD>대중교통 : 2호선 구로디지털단지역 3번 출구에서 900m 도보(16분)<br>
+		7호선 남구역 2번 출구에서 800m (15분)<br>	
+	</TD>
+</TR>
+</TABLE>
+<script>
+    var map;
+    
+    map = new daum.maps.Map(document.getElementById('map'), {
+        center : new daum.maps.LatLng(37.482547, 126.894301)
+    });
+    var marker = new daum.maps.Marker({
+        position : new daum.maps.LatLng(37.482547, 126.894301)
+    });
+    marker.setMap(map);
+</script>

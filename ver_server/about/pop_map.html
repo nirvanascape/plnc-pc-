@@ -1,0 +1,30 @@
+<? include $_SERVER['DOCUMENT_ROOT'].'/common/config.inc.php';?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML>
+<HEAD>
+<TITLE>(주)피엘엔씨테크놀로지</TITLE>
+<meta http-equiv="Content-Type" content="text/html; charset=euc-kr">
+<META NAME="Generator" CONTENT="EditPlus">
+<META NAME="Author" CONTENT="">
+<META NAME="Keywords" CONTENT="">
+<META NAME="Description" CONTENT="">
+<link rel="stylesheet" href="/style.css" type="text/css">
+<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=36f0385c26551ee806978a19f88a1993&libraries=services,clusterer,drawing"></script>
+</HEAD>
+
+<style>
+body {background:none;}
+#btnPad {
+    width: inherit
+}
+#popupW > div {
+    margin: 30px
+}
+</style>
+<BODY onload="window.focus();window.print();">
+<div align="center" id="popupW">
+    <? include $_SERVER["DOCUMENT_ROOT"]."/about/map3.inc.html"; ?>
+</div>
+<div align="right" id="btnPad"><a href="javascript:self.close();"><img src="/img/common/popbtn_close.gif"></a></div>
+</BODY>
+</HTML>
