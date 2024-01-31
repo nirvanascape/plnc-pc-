@@ -1,0 +1,168 @@
+<?
+include $_SERVER["DOCUMENT_ROOT"]."/common/config.inc.php";
+include $_SERVER["DOCUMENT_ROOT"]."/inc/top.html";
+include $_SERVER["DOCUMENT_ROOT"]."/inc/navi.inc.php";
+
+$idx = $_REQUEST['idx'];
+$id = $_REQUEST['id'];
+$PageNo = $_REQUEST['PageNo'];
+
+include $_SERVER["DOCUMENT_ROOT"]."/inc/bbs_top.html";
+
+$query = "SELECT * FROM bbs_conf WHERE id='".$id."'";
+$RowConf = $objdb->sqlRow( $query );
+
+if(($RowConf[_read] == 'm' && empty($_USERID))){
+	$objfunc->alertBack('회원전용입니다.');
+}
+
+$sql = "SELECT * FROM bbs WHERE idx = '".$idx."'";
+$row = $objdb->sqlRow($sql);
+
+if($row[chklock]=='y'){
+	if($_SESSION['_USERID'] && $row[id]){
+		if( $row[depth] == 0 ){
+			if($_SESSION['_USERID']!= $row[id] ){
+				$objfunc->alertBack('접근권한이 없습니다.');
+			}
+		}else{
+			$prent_thread = ceil($row[thread]/1000)*1000;
+			$sql = "SELECT id FROM bbs WHERE thread = '".$prent_thread."'";
+			$prentId = $objdb->sqlRowOne($sql);
+			if( $_SESSION['_USERID'] != $prentId ){
+				$objfunc->alertBack('접근권한이 없습니다.');
+			}
+		}
+	}
+	else{
+		if($row[pass]){
+			if($row[pass] != $_SESSION['_BBSPW'] && $_SESSION['_BBSCHK'] != 'ok'){
+				$objfunc->alertBack('비밀번호가 일치하지 않습니다.');
+			}
+		}
+		else{
+			$objfunc->alertBack('접근권한이 없습니다.');	
+		}
+	}
+}
+?>
+<SCRIPT LANGUAGE="JavaScript">
+function commChk(){
+	if(comm.rname.value.length==0){
+		alert("이름을 입력하세요");
+		comm.rname.focus();
+		return false;
+	}
+	else if(comm.pass.value.length==0){
+		alert("비밀번호을 입력하세요");
+		comm.pass.focus();
+		return false;
+	}
+	else if(comm.rcomment.value.length==0){
+		alert("내용을 입력하세요");
+		comm.rcomment.focus();
+		return false;
+	}			
+return true;
+}
+
+
+
+</SCRIPT>
+
+<? include $_SERVER["DOCUMENT_ROOT"]."/inc/subtop.html";?>
+
+<!-- CONTENTS -->
+
+
+<? //include $_SERVER["DOCUMENT_ROOT"]."/bbs/bbstitle.inc.html";?>
+
+<?
+
+$see_result= mysql_query ("update bbs set see=see+1 where idx=$idx");
+
+$rwdate = substr($row[wdate],0,10);
+?>
+
+<TABLE border="0" cellpadding="0" cellspacing="0" id="tblV" class="tbl" width="92%">
+<colgroup><col width="11%"><col width="35%"><col width="11%"><col width="35%"></colgroup>
+<TR>
+	<TH class="bg">제목</TH>
+	<TD class="bg" colspan="3"><font class="dgray">
+	<?
+	$title = strip_tags($objfunc->str_cut($row[title],50),'<font><b>');
+		if(!$title) $title = "제목없음";
+	?>
+	<?=$title?>
+	
+	&nbsp;</font><?=(($row[chklock]==y)?'<font color=fdbdbd>(비밀글)</font>':'')?>
+	</TD>
+</TR>
+<TR>
+	<TH>작성자</TH>
+	<TD class="line"><?=$objfunc->htmlText($row[name])?></TD>
+	<TH>작성일</TH>
+	<TD><?=$rwdate?></TD>
+</TR>
+
+<?if($row[clipfile]){?>
+<TR>
+	<TH>첨부파일</TH>
+	<TD colspan="3" class="px11"><A HREF="/bbs/clipfile/<?=$row[clipfile]?>" class='linkmenu'><img src="/img/common/bbsico_file.gif" border='0'>&nbsp;<?= download( $row[clipfile], '/bbs/clipfile/' ) ?>&nbsp;&nbsp;&nbsp;</A>
+	</TD>
+</TR>
+<?}?>
+</TABLE>
+
+<div id="tblView" style='word-break:break-all'  class="fix">
+
+<!-- 포토이미지 있을 경우만 -->
+<?if($row[clipfile]){?>
+<div class="fix">
+<!-- ※이미지가 안보이실 경우 인터넷 익스플로어 도구 -> 인터넷 옵션 -> 고급 -> UFT-8로 보내기를 체크해제 해주세요.<br><br> -->
+<?
+$info = $row[clipfile];
+if((strpos($info,"jpg") || strpos($info,"gif") || strpos($info,"bmp") || strpos($info,"JPG") || strpos($info,"BMP"))){
+	$img_size = getimagesize($_SERVER["DOCUMENT_ROOT"]."/bbs/clipfile/".$info);
+	if($img_size[0] > 670){
+		$width = "670";
+	}else{
+		$width = $img_size[0];
+	}
+echo make_img('/bbs/clipfile/'.$row[clipfile],  $width);
+}
+?>
+</div>
+<?}?>
+<!-- 포토이미지 있을 경우만 -->
+<?= $objfunc->htmlText( $row[comment], $row[htmlcheck] ) ?>
+</div>
+
+<!-- btn -->
+<div id="btnPad">
+<? if ( ($RowConf[_write] == 'f') || ($RowConf[_write] == 'm' && !empty($_USERID)) ){ ?>
+<A HREF="/bbs/bbsWrite.html?<?=$bbsQrystr?>"><img src="/img/common/bbsbtn_write.gif"></A>
+<?
+	if($RowConf[_type] != "i"){
+?>
+
+<A HREF="/bbs/bbsReply.html?<?=$bbsQrystr?>"><img src="/img/common/bbsbtn_reply.gif"></A>
+<?
+	} 
+}
+if($RowConf[_write]!='a'){
+?>
+<A HREF="/bbs/bbsPw.html?type=modify&<?=$bbsQrystr?>"><img src="/img/common/bbsbtn_modi.gif"></A>
+<A HREF="/bbs/bbsPw.html?type=delete&<?=$bbsQrystr?>"><img src="/img/common/bbsbtn_del.gif" onclick="return confirm('삭제하시겠습니까?')"></A>
+<?}?>
+<A HREF="/bbs/bbsList.html?<?=$bbsQrystr?>" ><img src="/img/common/bbsbtn_list.gif"></A>
+</div>
+<!-- //btn -->
+
+
+
+<!-- //CONTENTS -->
+<?
+	include $_SERVER["DOCUMENT_ROOT"]."/inc/subbottom.html";
+	include $_SERVER["DOCUMENT_ROOT"]."/inc/bottom.html";
+?>

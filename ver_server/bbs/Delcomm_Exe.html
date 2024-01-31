@@ -1,0 +1,61 @@
+<?
+include $_SERVER['DOCUMENT_ROOT'].'/common/config.inc.php';
+$idx = $_REQUEST['idx'];
+$board_id = $_REQUEST['id'];
+$page_no = $_REQUEST['page_no'];
+$rid = $_REQUEST["rid"];
+$type = $_REQUEST["type"];
+$pass = $_REQUEST["pass"];
+
+if($mode == "reload"){
+	$_PAGEMODE = true;
+	$sql = "select pass from comment where id = '".$rid."'";
+	$truepass = $objdb->sqlRowOne($sql);
+
+	if($truepass != $pass){
+		echo "<script>parent.document.getElementById('nopass').style.display = 'block';</script>";
+	}
+	else{
+		$sql ="delete from comment where id = '".$rid."'";
+		$objdb->sqlExe($sql);
+		$sql = " UPDATE bbs SET cmt_cnt=cmt_cnt-1 WHERE idx='".$idx."'";
+		$objdb->sqlExe($sql);
+		$objfunc -> closeParent();
+	}
+}
+
+$poptitle = '비밀번호 확인';
+$poptit = 'pw';
+
+include $_SERVER["DOCUMENT_ROOT"]."/inc/poptop.html";
+?>
+<script>
+function pass_chk(form){	
+	if(!form.pass.value){
+		alert('비밀번호를 입력해주세요.');
+		form.pass.focus();
+		return false;
+	}
+	if(!confirm('삭제하시겠습니까?')){
+		return false;
+	}
+}
+</script>
+<form name="pass_frm" method="post" target='delFrame' onsubmit="return pass_chk(this)">
+<input type="hidden" name="mode" value="reload">
+<input type="hidden" name="rid" value="<?=$rid?>">
+<input type="hidden" name="idx" value="<?=$idx?>">
+<div class="icotx">
+글의 수정/삭제를 위한 비밀번호를 입력해주세요.
+<div class="red" style="display:none" id="nopass"><B>!</B> 비밀번호가 일치하지 않습니다.</div>
+</div>
+<div class="dotbox">
+<font class="black">- 비밀번호</font> 
+<INPUT TYPE="password" NAME="pass" class="formbox" style="width:50%"><input type="image" src="/img/common/popbtn_ok.gif" align="absmiddle" hspace="3">
+</div>
+</form>
+
+<?
+include $_SERVER["DOCUMENT_ROOT"]."/inc/popbottom.html";
+?>
+<iframe id='delFrame' name='delFrame' width=0 height=0></iframe>

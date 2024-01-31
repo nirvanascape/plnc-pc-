@@ -1,0 +1,120 @@
+<?
+include $_SERVER["DOCUMENT_ROOT"]."/common/config.inc.php";
+include $_SERVER["DOCUMENT_ROOT"]."/inc/top.html";
+include $_SERVER["DOCUMENT_ROOT"]."/inc/navi.inc.php";
+?>
+<SCRIPT LANGUAGE="JavaScript">
+function go_list() {
+	self.location = "/bbs/bbsList.html?<?=$bbsQrystr?>";
+}
+function write_chk(write){
+	var form = document.write;
+	if(form.name.value == '' || form.name.value == null ){
+		alert('작성자를 입력하세요.');
+		form.name.focus();
+		return false;
+	}
+	if(form.title.value == '' || form.title.value == null ){
+		alert('제목을 입력하세요.');
+		form.title.focus();
+		return false;
+	}
+	else if(form.comment.value == '' || form.comment.value == null ){
+		alert('내용을 입력하세요.');
+		return false;
+	}
+<? if( empty($_USERID) ) { ?>
+	else if(form.pass.value == '' || form.pass.value == null ){
+		alert('비밀번호를 입력하세요.');
+		form.pass.focus();
+		return false;
+	}
+
+<? } ?>
+
+}
+</SCRIPT>
+
+<?
+$query = "SELECT * FROM bbs_conf WHERE id='".$_REQUEST[id]."'";
+$RowConf = $objdb->sqlRow( $query );
+
+if($_USERLEVEL == '') $_USERLEVEL = 0 ;
+if( $RowConf[chklevel] == y ){
+	if( empty($_USERID) ){
+	$objfunc->alertBack('접근권한이 없습니다');
+	} else {
+		if ( $RowConf["level_$_USERLEVEL"] == y ) {
+			$objfunc->alertBack('접근권한이 없습니다');
+		}
+	}
+}
+if ( ($RowConf[_read] == 'm') && (empty($_USERID)) ){ 
+ $objfunc->alertBack('접근권한이 없습니다');
+}
+
+?>
+<? include $_SERVER["DOCUMENT_ROOT"]."/inc/subtop.html";?>
+
+<!-- CONTENTS -->
+
+
+<? include $_SERVER["DOCUMENT_ROOT"]."/bbs/bbstitle.inc.html";?>
+
+<form name='write' action="/bbs/insert.html?<?=$bbsQrystr?>" method='post' ENCTYPE="multipart/form-data" onSubmit='return write_chk(write)'>
+<input type='hidden' name='htmlcheck' value='y'>
+<TABLE border="0" cellpadding="0" cellspacing="0" id="tblM" class="tbl">
+<colgroup><col width="18%"><col width="82%"></colgroup>
+<? if( $_USERID ) { ?>
+<input type='hidden' name='userid' value='<?= $_USERID ?>'>
+<? } ?>
+<input type="hidden" name="mode" value="insert">
+<TR>
+	<TH>작성자</TH>
+	<TD><INPUT TYPE="text" NAME="name" class="formbox" value="<?=$_USERNAME ?>"></TD>
+</TR>
+<TR>
+	<TH>이메일</TH>
+	<TD><INPUT TYPE="text" NAME="email" class="formbox" style="width:60%" value='<?= $_USEREMAIL ?>'> (예 : abcd@abcd.com)</TD>
+</TR>
+<TR>
+	<TH>제목</TH>
+	<TD><INPUT TYPE="text" NAME="title" class="formbox w100"></TD>
+</TR>
+<TR>
+	<TH>내용</TH>
+	<TD>
+	<?
+			include $_SERVER['DOCUMENT_ROOT'].'/common/new_editor/spaw_control.class.php';
+			$sw = new SPAW_Wysiwyg( 'comment', '', '100%', '300px', false, "default" );
+			$sw->show();
+	?>		
+	</TD>
+</TR>
+<TR>
+	<TH>첨부파일</TH>
+	<TD><INPUT TYPE="file" NAME="clipfile" class="formbox w100" class='box'></TD>
+</TR>
+<? if( empty($_USERID) ) { ?>
+<TR>
+	<TH>비밀번호</TH>
+	<TD><INPUT TYPE="password" NAME="pass" class="formbox"> ( 게시물의 수정/삭제를 위한 비밀번호를 입력해주세요. )</TD>
+</TR>
+<? } ?>
+<TR>
+	<TH>공개여부</TH>
+	<TD><font class="dgray sp"><INPUT TYPE="radio" NAME="chklock" value='n' checked>공개&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<INPUT TYPE="radio" NAME="chklock" value='y'>비공개</font> (작성자와 관리자만 확인할 수 있습니다.)</TD>
+</TR>
+</TABLE>
+
+<div id="btnPad"><input type="image" src="/img/common/btn_ok.gif" hspace="2"><A HREF="#" onClick="go_list();"><img src="/img/common/btn_cancel.gif" hspace="2"></A></div>
+</form>
+
+<!-- btn -->
+<!-- <div id="btnPad"><A HREF="#" onClick="write_chk();"><img src="/img/common/btn_ok.gif" hspace="2"></A><A HREF="javascript:history.back();"><img src="/img/common/btn_cancel.gif" hspace="2"></A></div>
+ -->
+<!-- //CONTENTS -->
+<?
+	include $_SERVER["DOCUMENT_ROOT"]."/inc/subbottom.html";
+	include $_SERVER["DOCUMENT_ROOT"]."/inc/bottom.html";
+?>

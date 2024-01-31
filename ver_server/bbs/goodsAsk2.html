@@ -1,0 +1,277 @@
+<?php
+include $_SERVER["DOCUMENT_ROOT"]."/common/config.inc.php";
+include $_SERVER["DOCUMENT_ROOT"]."/inc/top3.html";
+include $_SERVER['DOCUMENT_ROOT'].'/inc/goodsAsk_top.html';
+include $_SERVER["DOCUMENT_ROOT"]."/inc/navi.inc.php";
+include $_SERVER["DOCUMENT_ROOT"]."/inc/subtop3.html";
+
+$TBLMF	=	"my_form";
+$TBLMFD	=	"my_form_data";
+$TBLB	=	"bbs";
+$TBLBM	=	"bbs_conf";
+
+$saveDirSys = $_SERVER['DOCUMENT_ROOT']."/bbs/clipfile";
+
+$form_length = 15;
+
+if( post_var_chk( "mode", "insertMyForm" ) ) {
+	$sql = "SELECT idx FROM $TBLMFD ".
+			"WHERE form_id = '".$_REQUEST[form_id]."' AND f_must = 'y'";
+	$f_must_y = $objdb->sqlArrayOne( $sql );
+
+	for( $i = 1; $i <= $form_length; $i++ ) {
+		$form_title = $_REQUEST[form_title][$i];
+		$form_data = $_REQUEST[form_data][$i];
+		$_files_tmp_name = $_FILES[form_data][tmp_name][$i];
+		$_files_name = $_FILES[form_data][name][$i];
+
+		if( in_array( $i, $f_must_y ) && $form_data == "" && $_files_tmp_name == "" ) {
+			$objfunc->alert( "".$form_title." 항목은 필수항목입니다." );
+		}
+
+		if( $_files_tmp_name ) {
+			$_files_name = $objfile->uploadFile( $_files_tmp_name, $_files_name, $saveDirSys, false );
+
+			$_REQUEST[form_data][$i] = $_files_name;
+			$bbsClipfile = $_files_name;
+		}
+	}
+	
+	$sql = "SELECT * FROM $TBLMF ".
+			"WHERE form_id = '".$_REQUEST[form_id]."'";
+	$f = $objdb->sqlRow( $sql );
+
+	$bbsTitle = $_REQUEST[form_data][$f[form_to_bbs_title]];
+	$bbsWriter = $_REQUEST[form_data][$f[form_to_bbs_writer]];
+	$bbsEmail = $_REQUEST[form_data][$f[form_to_bbs_email]];
+
+	$bbsContent = "";
+	foreach( $_REQUEST[form_title] as $k => $v ) {
+		$bbsContent .= "<font color=4289A2>[".$v."]</font><br>".nl2br( $_REQUEST[form_data][$k] )."<br><br>";
+	}
+
+	$bbsId = $f[form_to_bbs];
+
+	$sql = "SELECT MAX( no ) FROM $TBLB ".
+			"WHERE bbsid = '".$bbsId."'";
+	$bbsNo = $objdb->sqlMaxNo( $sql );
+
+	$refno = $bbsNo;
+
+	$sql = "SELECT MAX( sortno ) FROM $TBLB ".
+			"WHERE bbsid = '".$bbsId."'";
+	$bbsSortno = $objdb->sqlMaxNo( $sql );
+
+	$sql = "SELECT func_set, title FROM $TBLBM WHERE id = '".$bbsId."'";
+	$board = $objdb->sqlRow( $sql );
+	$BOARDTITLE				= $board[title];
+	$bbsfunc					= unserialize( $board[func_set] );
+
+	if( $bbsfunc[chkboardlockall] == "y" ) $bbsChklock = "y";
+	else $bbsChklock = "n";
+
+	$sql_max = "SELECT MAX(THREAD) FROM bbs";
+	$max_thread_result = mysql_query($sql_max);
+	$max_thread_fetch = mysql_fetch_row($max_thread_result);
+	$max_thread = ceil($max_thread_fetch[0]/1000)*1000+1000;
+
+	$sql = "INSERT INTO $TBLB ( ".
+			"idx, thread, depth, board_id, title, name, email, comment, htmlcheck, ".
+			"wdate, see, id, clipfile, chklock ".
+			") VALUES ( ".
+			"'','".$max_thread."',0, '".$bbsId."', '".$bbsTitle."', '".$bbsWriter."', '".$bbsEmail."', '".$bbsContent."', 'y', ".
+			"SYSDATE(), '0', '".$_USERID."', '".$bbsClipfile."', 'n' ".
+			")";
+	$objdb->sqlExe( $sql );
+
+	if( $bbsfunc[chkmail] == "y" ) {
+		$subject = "[나만의폼] ".$form_name." 폼에 글이 등록되었습니다.";
+		$body = "제목: ".$bbsTitle."<br><br>".$bbsContent;
+
+		$objfunc->sendMail( $_EMAIL, $_EMAIL, $_SHOPNAME, $subject, $body, "y" );
+	}
+
+	$objfunc->reloadParent( "등록되었습니다.");
+}
+?>
+
+<?
+$_ICODOT01 = '<IMG SRC="/shopuser/btn_img/ico_dot01.gif" border=0 align=absmiddle class="mr5">';
+$_ICOORANGE = '<IMG SRC="/shopuser/btn_img/ico_orangear.gif" border=0 align=absmiddle class="mr5">';
+?>
+
+<?
+$sql = "SELECT * FROM $TBLMF ".
+		"WHERE form_id = '".$_REQUEST[form_id]."'";
+$form = $objdb->sqlRow( $sql );
+?>
+
+<SCRIPT>
+function insertMyForm( f ) {
+	f.target = makeTarget();
+
+	return true;
+}
+</SCRIPT>
+
+<!-- CONTENTS -->
+		<p class="main_subj customer_subj">Customer</p>
+  </header><!--/////sub header/////-->
+    <section>
+        <div class="util_menu clearix">
+            <ul class="clearfix sub_container">
+                <li><img src="../images/homemenu_icon.png" alt="home icon"></li>
+                <li><h3>Home</h3></li>
+                <li>&gt;</li>
+                <li><h3>Service</h3></li>
+                <li>&gt;</li>
+                <li><h3 class="change_text">제품문의</h3></li>
+            </ul>
+        </div>
+        <div class="sub_section sub_container">
+            <div class="sub_title sub_title01 clearfix">
+                <div class="sub_title_left">
+                    <img src="../images/app_icon_customer.png" alt="evro app icon">
+                </div>
+                <div class="sub_title_right">
+                    <h4>Evro</h4>
+                    <p>전기차 모바일멤버쉽</p>
+                    <div class="app_animate clearfix">
+                        <div class="number_animate" data-rate="3.5">3.5</div>
+                        <div class="stars_animate clearfix">
+                            <div class="stars">
+                                <img src="../images/app_star_empty.png" alt="empty star icon" class="star_empty star_empty1">
+                                <img src="../images/app_star.png" alt="star icon" class="star_scale star_scale1">
+                            </div>
+                            <div class="stars">
+                                <img src="../images/app_star_empty.png" alt="empty star icon" class="star_empty star_empty2">
+                                <img src="../images/app_star.png"  alt="star icon" class="star_scale star_scale2">
+                            </div>
+                            <div class="stars">
+                                <img src="../images/app_star_empty.png" alt="empty star icon" class="star_empty star_empty3">
+                                <img src="../images/app_star.png" alt="star icon" class="star_scale star_scale3">
+                            </div>
+                               <div class="stars">
+                                <img src="../images/app_star_empty.png" alt="empty star icon" class="star_empty star_empty4">
+								<img src="../images/app_star_half.png"  alt="star icon" class="star_scale star_scale4">
+                            </div>
+                            <div class="stars">
+                                <img src="../images/app_star_empty.png" alt="empty star icon" class="star_empty star_empty5">
+                                <!-- <img src="../images/app_star.png"  alt="star icon" class="star_scale star_scale5"> --> 
+                            </div>
+                        </div>
+                    </div>
+                    <p><span>48</span>개의 평가</p>
+                </div>
+                <img src="../images/good_gesture01.png" alt="good gesture" class="good_gesture">
+            </div>
+			<div class="tab-wrapper2 sub_container opacity_an">	
+                 <ul class="tab-menu2 tab_about clearfix">
+                    <li><a href="/bbs/bbsList2.html?id=notice">공지사항</a></li>
+                    <li><a href="/bbs/bbsList2.html?id=news">뉴스</a></li>
+                    <li><a href="/bbs/goodsAsk2.html?form_id=formform" class="active">제품문의</a></li>
+                </ul>
+				
+				
+				
+                <hr class="tab_hr about_hr">
+	
+                <div>
+                  <div>
+                    <div class="tabs_content tabs_content3 customer_tab">
+                        <div class="form_menu">
+                            	<form method="post"  target='exeFrame' enctype="multipart/form-data" onSubmit="return insertMyForm( this );">
+							
+								<!-- mail address -->
+								<table  border="0" cellpadding="0" cellspacing="0" id="tblW" class="tbl board">
+								<colgroup><col width="22%"><col width="78%" ></colgroup>
+								<?
+								$sql = "SELECT * FROM my_form_data ".
+										"WHERE form_id = '".$_REQUEST[form_id]."' AND f_use = 'y' ".
+										"ORDER BY idx";
+								$rs = $objdb->sqlResult( $sql );
+								while( $data = $objdb->sqlFetch( $rs ) ) {
+								?>
+								<tr>
+									<th>
+									<?= $data[f_name] ?><? if( $data[f_must] == "y" ) echo $star; ?>
+									<input type=hidden name="form_title[<?= $data[idx] ?>]" value="<?= $data[f_name] ?>">
+									</th>
+									<td>
+									<?
+									switch( $data[f_type] ) {
+										case "text" :
+									?>
+									<input type="text" name="form_data[<?= $data[idx] ?>]" class="formbox" value="<?= htmlText( $data[f_value] ) ?>" style="width:<?=$data[f_size]?>%">
+									<?
+											break;
+										case "select" :
+											$optval = explode( ";", $data[f_value] );
+									?>
+									<select name="form_data[<?= $data[idx] ?>]" class=formbox>
+									<? foreach( $optval as $k => $v ) { ?>
+									<option value="<?= $v ?>"><?= $v ?></option>
+									<? } ?>
+									</select>
+									<?
+											break;
+										case "radio" :
+											$optval = explode( ";", $data[f_value] );
+									?>
+									<? foreach( $optval as $k => $v ) { ?>
+									<input type=radio name="form_data[<?= $data[idx] ?>]" value="<?= $v ?>" <? if( $k == 0 ) echo "checked"; ?>><?= $v ?>
+									<? } ?>
+									<?
+											break;
+										case "textarea" :
+									?>
+									<textarea name="form_data[<?= $data[idx] ?>]" class="formbox w100" style="height:200px"><?= htmlText( $data[f_value] ) ?></textarea>
+									<?
+											break;
+										case "file" :
+									?>
+									
+									
+									
+									<p class="file_box">
+                                    <input class="file_name" type="text" readonly>                               
+                                    <input name="user_file" class="file_btn" id="file_btn" type="file" name="form_data[<?= $data[idx] ?>]">
+                                    <label class="file_button" for="file_btn">찾아보기</label>
+                                  </p>
+									<?
+											break;
+									}
+									?>
+									<?if( $data[f_comment] && $data[f_type] != "textarea" ){?>
+									<span class="addtx"><?=$data[f_comment]?></span>
+									<?}?>
+									</td>
+								</tr>
+								<? } ?>
+								</table>
+								<!-- mail address -->
+							
+								<!-- form table -->
+							
+								<!-- button -->
+								<p class="form_button" id="btnPad">
+                                    <button type="submit" class="send">확인</button>
+                                    <button type="submit" class="reset" onclick = "reset(); return false;">취소</button>
+                                </p>
+								<!-- button -->
+	
+								<input type="hidden" name="mode" value="insertMyForm">
+								<input type="hidden" name="form_id" value="<?= $_REQUEST[form_id] ?>">
+								<input type="hidden" name="form_name" value="<?= $form[form_name] ?>">
+								</form>
+                        </div>
+                    </div>
+                  </div>
+                </div>
+            </div> 	
+        </div>
+    </section>
+<!-- //CONTENTS -->
+<?
+	include $_SERVER["DOCUMENT_ROOT"]."/inc/bottom2.html";
+?>

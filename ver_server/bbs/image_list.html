@@ -1,0 +1,98 @@
+<TABLE border="0" cellpadding="0" cellspacing="0" id="tblP" class="tbl">
+<TR>
+	<TH><img src="/img/common/space.gif"></TH>
+	<TH><img src="/img/common/space.gif"></TH>
+	<TH><img src="/img/common/space.gif"></TH>
+	<TH><img src="/img/common/space.gif"></TH>
+</TR>
+<TR>
+<?
+$no = $TOTAL - $START;
+$dbnewperiod = '24';
+$newdate = date( "Y-m-d H:i:s", mktime( date( 'H' ) - $dbnewperiod, date( 'i' ), date( 's' ), date( 'm' ), date( 'd' ), date( 'Y' ) ) );
+
+$j = 0;
+while($row = $objdb->sqlFetch($result)){
+	$rwdate = substr($row[wdate],0,10);
+	$chk_lock = $row[chklock];
+	if(!$row[clipfile]){
+		$image = "/img/bbs/noimage.gif";
+	}else{
+		$image = "/bbs/clipfile/".$row[clipfile];
+	}
+?>
+
+	<TD>
+		<?
+		if($chk_lock == 'y'){
+			$linkUrl = "/bbs/bbsPw.html?type=check&mname=".$_REQUEST["mname"]."&subnum=".$_REQUEST["subnum"]."&m_num=".$_REQUEST["m_num"]."&id=".$_REQUEST["id"]."&idx=".$row["idx"]."&page=".$_REQUEST["page"]."&search_word=".$_REQUEST["search_word"]."&field=".$_REQUEST["field"];
+		}else if ( ($RowConf[_read] == 'f') || ($RowConf[_read] == 'm' && !empty($_USERID)) ){
+			$linkUrl = "/bbs/bbsView.html?mname=".$_REQUEST["mname"]."&m_num=".$_REQUEST["m_num"]."&subnum=".$_REQUEST["subnum"]."&id=".$_REQUEST["id"]."&idx=".$row["idx"]."&page=".$_REQUEST["page"]."&search_word=".$_REQUEST["search_word"]."&field=".$_REQUEST["field"];
+		} else {
+			$linkUrl = "javascript:alert('접근권한이 없습니다');";
+		}
+		?>
+		<div class="img"><A HREF="<?=$linkUrl?>" class='linkmenu'>
+		<img src="<?=$image?>" width="144" height="99" border="0"></A></div>
+		<div class="subject"><A HREF="<?=$linkUrl?>" class='linkmenu'>
+		<?
+		$title = strip_tags($objfunc->str_cut($row[title],18),'<b><font>');
+		if(!$title)	$title = "제목없음";
+		?>
+		<?=$title?>
+		</A>
+		<? if( $row[wdate] > $newdate ){?>
+		<img src='/img/common/bbsico_new.gif'>
+		<?}
+		if($chk_lock == "y"){	
+		?>
+		<img src='/img/common/bbsico_lock.gif'>
+		<?}?>
+		</div>
+		<div class="writer"><?=$objfunc->htmlText($row[name])?>
+		<font class="verdana sp"><?=$rwdate?></font></div>
+	</TD>
+<?
+$no--;
+$j++;
+if($j%4 == 0) echo "</TR><TR>";
+}
+if ( $j == 0 ){ ?>
+		<TD colspan='6' style='padding:8px 0 8px 0;'>등록된 글이 없습니다.</td>
+<? } ?>
+
+</TR>
+</TABLE>
+
+<TABLE border="0" cellpadding="0" cellspacing="0" width="100%">
+<TR>
+	<TD width="99%" align="center">
+		<!-- paging -->
+		<? $objfunc->adminPaging2( $PageNo, $PageSize, $TOTAL, '', $bbsQrystr ) ?>
+		<!-- //paging -->
+	</TD>
+<? if ( ($RowConf[_write] == 'f') || ($RowConf[_write] == 'm' && !empty($_USERID)) ){ ?>
+	<TD style="padding-top:9px"><img src="/img/common/bbsbtn_write.gif" onClick='go_write();' class='hand'><!-- 쓰기 있는 게시판만 --></TD>
+<? } ?>
+</TR>
+</TABLE>
+
+<!-- search -->
+<form name='search' method='get' action="<?=$_SERVER["PHP_SELF"]?>">
+<div id="bbsSearch">
+	<SELECT NAME='field' class='box'>
+				<OPTION VALUE="title" <?if($_GET[field] == title)echo "selected"?>>제목</option>
+				<OPTION VALUE="comment" <?if($_GET[field] == comment)echo "selected"?>>내용</option>
+				<OPTION VALUE='tplusc' <?if($_GET[field] == tplusc)echo "selected"?>>제목+내용</option>
+				<OPTION VALUE="name" <?if($_GET[field] == name)echo "selected"?>>작성자</option>
+			</SELECT>
+	<INPUT TYPE="text" NAME="search_word" class="formbox" value="<?=$search_word?>">
+	<input type="image" src="/img/common/bbsbtn_search.gif" align="absmiddle">
+	<input type='hidden' name='page' value='<?= $_REQUEST[page] ?>'>
+	<input type='hidden' name='id' value='<?= $_REQUEST[id] ?>'>
+	<input type='hidden' name='mname' value='<?= $_REQUEST[mname] ?>'>
+	<input type='hidden' name='subnum' value='<?= $_REQUEST[subnum] ?>'>
+	<input type='hidden' name='idx' value='<?= $_REQUEST[idx] ?>'>
+</div>
+</form>
+<!-- //search -->

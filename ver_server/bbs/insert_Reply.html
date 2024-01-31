@@ -1,0 +1,51 @@
+<?
+session_start();
+include $_SERVER['DOCUMENT_ROOT'].'/common/config.inc.php';
+
+$sql_max = "SELECT MAX(thread) FROM bbs";
+$max_thread_result = mysql_query($sql_max);
+$max_thread_fetch = mysql_fetch_row($max_thread_result);
+$max_thread = ceil($max_thread_fetch[0]/1000)*1000+1000;
+$userid = $_REQUEST[userid];
+
+$name = $_REQUEST[name];
+$pass = $_REQUEST[pass];
+$title = $_REQUEST[title];
+$comment = $_REQUEST[comment];
+$id = $_REQUEST[id];
+$chklock = $_REQUEST[parent_chklock];
+$htmlcheck = $_REQUEST[htmlcheck];
+$PageNo = $_REQUEST[PageNo];
+
+if(!trim($title)){
+	$title = '글제목 없음';
+}
+
+if(empty($htmlcheck)) $htmlcheck = 'n';
+?>
+
+
+<?
+	if ($parent_thread%1000 > 0){
+			$prev_parent_thread = floor($parent_thread/1000)*1000; 
+		}else{
+			$prev_parent_thread = $parent_thread - 1000;
+		}
+
+	$update_thread = mysql_query("UPDATE bbs SET thread=thread-1 WHERE thread > $prev_parent_thread AND thread < $parent_thread ");
+
+if(!empty($_FILES[clipfile][name])){
+	$file_name = ($_FILES[clipfile][name]);
+	$img_dir=$_SERVER["DOCUMENT_ROOT"]."/bbs/clipfile/";
+	$filename = $objfile->uploadFile($_FILES[clipfile][tmp_name], $file_name, $img_dir, true );
+
+	$query = "INSERT INTO bbs (idx, thread, depth, name, email, pass, title, comment, wdate, see, board_id, clipfile, chklock, htmlcheck, id) ";
+	$query .= "VALUES ('','".($parent_thread-1)."','".($parent_depth+1)."','$name','$email','$pass','$title','$comment',sysdate(),0,'$id','$filename','$chklock', '$htmlcheck', '$userid')";
+	$objdb->sqlExe($query);
+}else{
+	$query = "INSERT INTO bbs (idx, thread, depth, name, email, pass, title, comment, wdate, see, board_id, clipfile, chklock, htmlcheck, id) ";
+	$query .= "VALUES ('','".($parent_thread-1)."','".($parent_depth+1)."','$name','$email','$pass','$title','$comment',sysdate(), 0,'$id','','$chklock', '$htmlcheck', '$userid')";
+	$objdb->sqlExe($query);
+}
+$objfunc->goUrl("/bbs/bbsList.html?".$bbsQrystr);
+?>

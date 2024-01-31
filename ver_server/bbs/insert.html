@@ -1,0 +1,35 @@
+<?php
+session_start();
+include $_SERVER['DOCUMENT_ROOT'].'/common/config.inc.php';
+
+if( $mode != "insert" ) $objfunc->alertBack('올바른 접근방식이 아닙니다');
+
+$sql = "SELECT MAX(THREAD) FROM bbs";
+$max_thread_fetch = $objdb->sqlRowOne($sql);
+$max_thread = ceil($max_thread_fetch/1000)*1000+1000;
+$userid = $_REQUEST[userid];
+
+$name = $_REQUEST[name];
+$pass = $_REQUEST[pass];
+$title = $_REQUEST[title];
+$email = $_REQUEST[email];
+$comment = $_REQUEST[comment];
+$id = $_REQUEST[id];
+$chklock = $_REQUEST[chklock];
+$htmlcheck = $_REQUEST[htmlcheck];
+$PageNo = $_request[PageName];
+
+if( !trim($title) )	$title = '글제목 없음';
+if( empty($htmlcheck) ) $htmlcheck = 'n';
+if( !empty($_FILES[clipfile][name]) ) {
+	$file_name = ($_FILES[clipfile][name]);
+	$img_dir=$_SERVER["DOCUMENT_ROOT"]."/bbs/clipfile/";
+	$filename = $objfile->uploadFile($_FILES[clipfile][tmp_name], $file_name, $img_dir, true );
+}
+	//업로드끝!
+	$query = "INSERT INTO bbs (idx, thread, depth, name, pass, title, comment, wdate, see, board_id, clipfile, chklock, htmlcheck, id, email) ";
+	$query .= "VALUES ('',$max_thread,0,'$name','$pass','$title','$comment',sysdate(), 0,'$id','$filename','$chklock', '$htmlcheck', '$userid', '$email')";
+	$objdb->sqlExe($query);
+	$objfunc->goUrl("/bbs/bbsList.html?".$bbsQrystr);
+
+?>

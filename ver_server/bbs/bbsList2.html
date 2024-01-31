@@ -1,0 +1,58 @@
+<?
+include $_SERVER["DOCUMENT_ROOT"]."/common/config.inc.php";
+include $_SERVER["DOCUMENT_ROOT"]."/inc/top3.html";
+include $_SERVER["DOCUMENT_ROOT"]."/inc/bbs_top.html";
+include $_SERVER["DOCUMENT_ROOT"]."/inc/navi.inc.php";
+include $_SERVER["DOCUMENT_ROOT"]."/inc/subtop2.html";
+
+$PageNo = $_REQUEST['PageNo'];
+$qrystring = "&PageSize=$_REQUEST[PageSize]".
+				"&id=$_REQUEST[id]".
+				"&page=$_REQUEST[page]".
+				"&search_word=$_REQUEST[search_word]".
+				"&field=$_REQUEST[field]";
+
+if ($_GET[field]=="tplusc"){
+	$add_sql = "WHERE board_id='".$_REQUEST[id]."' AND (title LIKE '%" . $_GET[search_word] . "%' OR comment LIKE '%" . $_GET[search_word] . "%')"; 
+}
+elseif ($_GET[search_word]!="" and $_GET[field]!="tplusc"){ $add_sql = " WHERE board_id='".$_REQUEST[id]."' AND $_GET[field] LIKE '%" . $_GET[search_word] . "%' ";
+}
+else $add_sql= "WHERE board_id = '".$_REQUEST[id]."'";
+
+if( empty( $PageSize ) ) $PageSize = 10;
+
+if($RowConf[_type] == "i")	$PageSize = 12;
+
+if( empty( $PageNo ) ) $PageNo = 1;
+
+$START = $objfunc->getDbStartNo( $PageNo, $PageSize );
+
+$sql = "SELECT * FROM bbs ";
+$sql .= $add_sql;
+$TOTAL = $objdb->sqlNumRows($sql);
+$sql .= " ORDER BY thread DESC LIMIT $START, $PageSize";
+$result = $objdb->sqlResult($sql);
+
+$p_sql = "SELECT COUNT(*) FROM bbs WHERE board_id='".$_REQUEST[id]."'";
+$row_p = $objdb -> sqlRowOne($p_sql);
+?>
+
+
+<SCRIPT LANGUAGE="JavaScript">
+function go_write(){
+	self.location = "/bbs/bbsWrite.html?<?=$bbsQrystr?>";
+}
+</SCRIPT>
+
+<!-- CONTENTS -->
+<?
+if($RowConf[_type] == "i"){
+	include $_SERVER["DOCUMENT_ROOT"]."/bbs/image_list.html";
+}else{
+	include $_SERVER["DOCUMENT_ROOT"]."/bbs/default_list2.html";
+}
+?>
+<!-- //CONTENTS -->
+<?
+	include $_SERVER["DOCUMENT_ROOT"]."/inc/bottom2.html";
+?>

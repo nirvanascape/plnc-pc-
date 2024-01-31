@@ -1,0 +1,66 @@
+<?
+include $_SERVER['DOCUMENT_ROOT'].'/common/config.inc.php';
+$idx = $_REQUEST['idx'];
+$board_id = $_REQUEST['board_id'];
+$page_no = $_REQUEST['page_no'];
+
+//코멘트 삭제
+if($type == reply){
+?>
+<script>
+	if(confirm ('정말 삭제하시겠습니까?')){ true;
+	}else{
+	history.back();
+	}
+</script>
+<?
+			$com_sql = "DELETE FROM comment WHERE id='".$rid."'";
+			$objdb -> sqlExe($com_sql);
+			
+			$bbs_sql = "UPDATE bbs SET cmt_cnt = cmt_cnt-1 WHERE idx='".$idx."'";
+			$objdb -> sqlExe($bbs_sql);
+			$objfunc->alertCloseReload();
+					
+//글, 답글 삭제
+}else{
+$result=mysql_query("SELECT * FROM bbs WHERE idx=$idx");
+$row=mysql_fetch_array($result);
+
+$del_thread=$row[thread];
+$thread = $row[thread]-1; 
+$depth = $row[depth]+1;
+
+
+$sql=mysql_query("SELECT thread,depth FROM bbs WHERE thread=$thread AND depth=$depth");
+$row2 =mysql_fetch_array($sql);
+$n_thread =$row2[thread];
+$n_depth = $row2[depth];
+
+
+if($thread == $n_thread and $depth == $n_depth){
+			$url="/bbs/bbsView.html?".$bbsQrystr;
+			$message="답글이 있습니다.";
+			$objfunc->DoMessageLocation($message, $url);
+		}else{
+			if ($thread%1000 > 0) {
+				$prev_parent_thread = floor($thread/1000)*1000; 
+			}else{
+				$prev_parent_thread = $thread - 1000;
+			}
+
+				$sql = "SELECT clipfile FROM bbs WHERE idx='".$idx."'";
+					$file = $objdb->sqlRowOne($sql);
+					if($file){
+						$objfile->deleteFile($_SERVER["DOCUMENT_ROOT"].'/bbs/clipfile/'.$file);
+					}
+
+			$sql="DELETE FROM bbs WHERE idx = '".$idx."'";
+			$objdb -> sqlExe($sql);
+			
+			$update_thread = mysql_query("UPDATE bbs SET thread=thread+1 WHERE thread > $prev_parent_thread AND thread < $thread ");
+			$cmt_del =mysql_query("DELETE FROM comment WHERE bid ='".$idx."'");
+
+			Header("/bbs/bbsList.html?".$bbsQrystr);
+	}
+}
+?>

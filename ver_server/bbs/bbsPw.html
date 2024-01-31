@@ -1,0 +1,97 @@
+<?
+include $_SERVER["DOCUMENT_ROOT"]."/common/config.inc.php";
+include $_SERVER["DOCUMENT_ROOT"]."/inc/top.html";
+include $_SERVER["DOCUMENT_ROOT"]."/inc/navi.inc.php";
+
+$query = "SELECT * FROM bbs_conf WHERE id='".$id."'";
+$RowConf = $objdb->sqlRow( $query );
+
+$sql = "select pass from bbs where idx='".$idx."'";
+$dbpass = $objdb->sqlRowOne($sql);
+
+if($mode=='reload'){
+	if($dbpass == $password){
+		$_SESSION['_BBSPW'] = $password;
+		$_SESSION['_BBSCHK'] = 'ok';
+	}
+	else{
+		$_SESSION['_BBSPW'] = '';
+		$_SESSION['_BBSCHK'] = '';
+	}
+		$objfunc->goParent($gourl);
+}
+
+$sql = "select name, title, pass, id from bbs where idx='".$idx."' ";
+$row = $objdb->sqlRow($sql);
+
+if($type=='delete'){
+	$url = '/bbs/bbsDelete.html?'.$bbsQrystr;
+}
+else if($type=='modify'){
+	$url = '/bbs/bbsModify.html?'.$bbsQrystr;
+}
+else if($type=='check'){
+	$url = '/bbs/bbsView.html?'.$bbsQrystr;
+}
+
+if(($_SESSION['_USERID'] && $row[id])){
+	$objfunc->goUrl($url);
+}
+else if($type!='check' && ($_SESSION['_BBSCHK']=='ok' && $dbpass == $_SESSION['_BBSPW'])){
+	$objfunc->goUrl($url);
+}
+
+
+?>
+<SCRIPT LANGUAGE="JavaScript">
+
+function chkForm(){
+	var form = document.form;
+	if(!form.password.value){
+		alert('비밀번호를 입력해주세요.');
+		form.password.focus();
+		return;
+	}
+	form.submit();
+}
+</SCRIPT>
+
+<? include $_SERVER["DOCUMENT_ROOT"]."/inc/subtop.html";?>
+
+<!-- CONTENTS -->
+
+
+<? include $_SERVER["DOCUMENT_ROOT"]."/bbs/bbstitle.inc.html";?>
+<TABLE border="0" cellpadding="0" cellspacing="0" id="tblW" class="tbl">
+<colgroup><col width="22%"><col width="78%"></colgroup>
+<TR>
+	<TH>작성자</TH>
+	<TD><font class="dgray"><?=$objfunc->htmlText($row[name])?></font></TD>
+</TR>
+<TR>
+	<TH>제목</TH>
+	<TD><font class="dgray">
+	<?
+	$title = strip_tags($objfunc->str_cut($row[title],50),'<font><b>');
+	if(!$title) $title = "제목없음";
+	?>
+	<?=$title?>
+	</font></TD>
+</TR>
+<TR>
+<form name='form' method="post" target='exeFrame' >
+<input type='hidden' name='mode' value='reload'>
+<input type='hidden' name='gourl' value='<?=$url?>'>
+	<TH>비밀번호</TH>
+	<TD><INPUT TYPE="password" NAME="password" class="formbox"></TD>
+</form>
+</TR>
+</TABLE>
+<!-- btn -->
+<div id="btnPad"><A HREF="#" onclick='chkForm();'><img src="/img/common/btn_ok.gif" hspace="2"></A><A HREF="javascript:history.back();"><img src="/img/common/btn_cancel.gif" hspace="2"></A></div>
+
+<!-- //CONTENTS -->
+<?
+	include $_SERVER["DOCUMENT_ROOT"]."/inc/subbottom.html";
+	include $_SERVER["DOCUMENT_ROOT"]."/inc/bottom.html";
+?>

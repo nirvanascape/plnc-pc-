@@ -1,0 +1,289 @@
+<?php
+include $_SERVER["DOCUMENT_ROOT"]."/common/config.inc.php";
+include $_SERVER['DOCUMENT_ROOT'].'/inc/goodsAsk_top.html';
+include $_SERVER["DOCUMENT_ROOT"]."/inc/navi.inc.php";
+
+$TBLMF	=	"my_form";
+$TBLMFD	=	"my_form_data";
+$TBLB	=	"bbs";
+$TBLBM	=	"bbs_conf";
+
+$saveDirSys = $_SERVER['DOCUMENT_ROOT']."/bbs/clipfile";
+
+$form_length = 15;
+
+if( post_var_chk( "mode", "insertMyForm" ) ) {
+	$sql = "SELECT idx FROM $TBLMFD ".
+			"WHERE form_id = '".$_REQUEST[form_id]."' AND f_must = 'y'";
+	$f_must_y = $objdb->sqlArrayOne( $sql );
+
+	for( $i = 1; $i <= $form_length; $i++ ) {
+		$form_title = $_REQUEST[form_title][$i];
+		$form_data = $_REQUEST[form_data][$i];
+		$_files_tmp_name = $_FILES[form_data][tmp_name][$i];
+		$_files_name = $_FILES[form_data][name][$i];
+
+		if( in_array( $i, $f_must_y ) && $form_data == "" && $_files_tmp_name == "" ) {
+			$objfunc->alert( "".$form_title." 항목은 필수항목입니다." );
+		}
+
+		if( $_files_tmp_name ) {
+			$_files_name = $objfile->uploadFile( $_files_tmp_name, $_files_name, $saveDirSys, false );
+
+			$_REQUEST[form_data][$i] = $_files_name;
+			$bbsClipfile = $_files_name;
+		}
+	}
+	
+	$sql = "SELECT * FROM $TBLMF ".
+			"WHERE form_id = '".$_REQUEST[form_id]."'";
+	$f = $objdb->sqlRow( $sql );
+
+	$bbsTitle = $_REQUEST[form_data][$f[form_to_bbs_title]];
+	$bbsWriter = $_REQUEST[form_data][$f[form_to_bbs_writer]];
+	$bbsEmail = $_REQUEST[form_data][$f[form_to_bbs_email]];
+
+	$bbsContent = "";
+	foreach( $_REQUEST[form_title] as $k => $v ) {
+		$bbsContent .= "<font color=4289A2>[".$v."]</font><br>".nl2br( $_REQUEST[form_data][$k] )."<br><br>";
+	}
+
+	$bbsId = $f[form_to_bbs];
+
+	$sql = "SELECT MAX( no ) FROM $TBLB ".
+			"WHERE bbsid = '".$bbsId."'";
+	$bbsNo = $objdb->sqlMaxNo( $sql );
+
+	$refno = $bbsNo;
+
+	$sql = "SELECT MAX( sortno ) FROM $TBLB ".
+			"WHERE bbsid = '".$bbsId."'";
+	$bbsSortno = $objdb->sqlMaxNo( $sql );
+
+	$sql = "SELECT func_set, title FROM $TBLBM WHERE id = '".$bbsId."'";
+	$board = $objdb->sqlRow( $sql );
+	$BOARDTITLE				= $board[title];
+	$bbsfunc					= unserialize( $board[func_set] );
+
+	if( $bbsfunc[chkboardlockall] == "y" ) $bbsChklock = "y";
+	else $bbsChklock = "n";
+
+	$sql_max = "SELECT MAX(THREAD) FROM bbs";
+	$max_thread_result = mysql_query($sql_max);
+	$max_thread_fetch = mysql_fetch_row($max_thread_result);
+	$max_thread = ceil($max_thread_fetch[0]/1000)*1000+1000;
+
+	$sql = "INSERT INTO $TBLB ( ".
+			"idx, thread, depth, board_id, title, name, email, comment, htmlcheck, ".
+			"wdate, see, id, clipfile, chklock ".
+			") VALUES ( ".
+			"'','".$max_thread."',0, '".$bbsId."', '".$bbsTitle."', '".$bbsWriter."', '".$bbsEmail."', '".$bbsContent."', 'y', ".
+			"SYSDATE(), '0', '".$_USERID."', '".$bbsClipfile."', 'n' ".
+			")";
+	$objdb->sqlExe( $sql );
+
+	if( $bbsfunc[chkmail] == "y" ) {
+		$subject = "[나만의폼] ".$form_name." 폼에 글이 등록되었습니다.";
+		$body = "제목: ".$bbsTitle."<br><br>".$bbsContent;
+
+		$objfunc->sendMail( $_EMAIL, $_EMAIL, $_SHOPNAME, $subject, $body, "y" );
+	}
+
+	$objfunc->reloadParent( "등록되었습니다.");
+}
+?>
+
+<?
+$_ICODOT01 = '<IMG SRC="/shopuser/btn_img/ico_dot01.gif" border=0 align=absmiddle class="mr5">';
+$_ICOORANGE = '<IMG SRC="/shopuser/btn_img/ico_orangear.gif" border=0 align=absmiddle class="mr5">';
+?>
+
+<?
+$sql = "SELECT * FROM $TBLMF ".
+		"WHERE form_id = '".$_REQUEST[form_id]."'";
+$form = $objdb->sqlRow( $sql );
+?>
+
+<SCRIPT>
+function insertMyForm( f ) {
+	f.target = makeTarget();
+
+	return true;
+}
+</SCRIPT>
+
+
+<!DOCTYPE html>
+<html lang="ko">
+
+<!-- head 시작 -->
+<?php include $_SERVER['DOCUMENT_ROOT'].'/mobile/html/common/sub-head-bbsView.html'; ?>
+<!-- head 끝 -->
+
+<body>
+
+    <div class="wrap wrap-qna">
+
+        <!-- header 시작-->
+        <?php include $_SERVER['DOCUMENT_ROOT'].'/mobile/html/common/sub-header-bbsView.html'; ?>
+        <!-- header 끝 -->
+
+        <section class="sub-header">
+
+            <h2 class="sub-title sub-title3">customer</h2>
+            <div class="sub-nav">
+                <div class="sub-select">
+                    <h3 class="sub-select-text">제품문의</h3>
+                    <button class="sub-select-btn"></button>
+                </div>
+                <nav class="lnb">
+                    <a href="notice.html" class="nav-item">공지사항</a>
+                    <a href="news.html" class="nav-item">뉴스</a>
+                    <a href="qna.html" class="nav-item" style="color:#000;">제품문의</a>
+                </nav>
+            </div>
+
+        </section>
+
+        <main class="sub-main qna">
+
+            <form method="post"  target='exeFrame' enctype="multipart/form-data" onSubmit="return insertMyForm( this );">
+                <table class="board-qna-tbl tbl board" id="tblW">
+                    <caption>게시판 본문 입니다.</caption>
+					<?
+					$sql = "SELECT * FROM my_form_data ".
+							"WHERE form_id = '".$_REQUEST[form_id]."' AND f_use = 'y' ".
+							"ORDER BY idx";
+					$rs = $objdb->sqlResult( $sql );
+					while( $data = $objdb->sqlFetch( $rs ) ) {
+					?>
+                    <tr>
+                        <th>
+                            <label for="title" class="star">
+                                제목<span class="blind">필수작성항목</span>
+                            </label>
+                        </th>
+                        <td>
+                            <?
+							switch( $data[f_type] ) {
+								case "text" :
+							?>
+							<input type="text" name="form_data[<?= $data[idx] ?>]" class="formbox" value="<?= htmlText( $data[f_value] ) ?>" style="width:<?=$data[f_size]?>%">
+							<?
+									break;
+								case "select" :
+									$optval = explode( ";", $data[f_value] );
+							?>
+							<select name="form_data[<?= $data[idx] ?>]" class=formbox>
+							<? foreach( $optval as $k => $v ) { ?>
+							<option value="<?= $v ?>"><?= $v ?></option>
+							<? } ?>
+							</select>
+							<?
+									break;
+								case "radio" :
+									$optval = explode( ";", $data[f_value] );
+							?>
+							<? foreach( $optval as $k => $v ) { ?>
+							<input type=radio name="form_data[<?= $data[idx] ?>]" value="<?= $v ?>" <? if( $k == 0 ) echo "checked"; ?>><?= $v ?>
+							<? } ?>
+							<?
+									break;
+								case "textarea" :
+							?>
+							<textarea name="form_data[<?= $data[idx] ?>]" class="formbox w100" style="height:200px"><?= htmlText( $data[f_value] ) ?></textarea>
+							<?
+									break;
+								case "file" :
+							?>
+							
+							
+							
+							<p class="file_box">
+							<input class="file_name" type="text" readonly>                               
+							<input name="user_file" class="file_btn" id="file_btn" type="file" name="form_data[<?= $data[idx] ?>]">
+							<label class="file_button" for="file_btn">찾아보기</label>
+						  </p>
+							<?
+									break;
+							}
+							?>
+							<?if( $data[f_comment] && $data[f_type] != "textarea" ){?>
+							<span class="addtx"><?=$data[f_comment]?></span>
+							<?}?>
+                        </td>
+                    </tr>
+<!--                     <tr> -->
+<!--                         <th> -->
+<!--                             <label for="name" class="star"> -->
+<!--                                 작성자<span class="blind">필수작성항목</span> -->
+<!--                             </label> -->
+<!--                         </th> -->
+<!--                         <td> -->
+<!--                             <input type="text" id="name" placeholder="모바일캐시비"> -->
+<!--                         </td> -->
+<!--                     </tr> -->
+<!--                     <tr> -->
+<!--                         <th> -->
+<!--                             <label for="email" class="star"> -->
+<!--                                 이메일<span class="blind">필수작성항목</span> -->
+<!--                             </label> -->
+<!--                         </th> -->
+<!--                         <td> -->
+<!--                             <input type="email" id="email" placeholder=""> -->
+<!--                         </td> -->
+<!--                     </tr> -->
+<!--                     <tr> -->
+<!--                         <th> -->
+<!--                             <label for="phone" class="star"> -->
+<!--                                 전화번호<span class="blind">필수작성항목</span> -->
+<!--                             </label> -->
+<!--                         </th> -->
+<!--                         <td> -->
+<!--                             <input type="text" id="phone"> -->
+<!--                         </td> -->
+<!--                     </tr> -->
+<!--                     <tr> -->
+<!--                         <th> -->
+<!--                             <label for="" class="star"> -->
+<!--                                 내용<span class="blind">필수작성항목</span> -->
+<!--                             </label> -->
+<!--                         </th> -->
+<!--                         <td> -->
+<!--                             <textarea name="name" rows="" cols=""></textarea> -->
+<!--                         </td> -->
+<!--                     </tr> -->
+<!--                     <tr> -->
+<!--                         <td class="file-area"> -->
+<!--                             <span class="title">첨부파일</span> -->
+<!--                             <span class="file-box"> -->
+<!--                                 <input type="text" class="file-name" readonly> -->
+<!--                                 <input type="file" class="file-btn blind" id="file-btn" name="user-file"> -->
+<!--                                 <label for="file-btn" class="file-button">찾아보기</label> -->
+<!--                             </span> -->
+<!--                         </td> -->
+<!--                     </tr> -->
+				<? } ?>
+                </table>
+                <div class="btn-area" id="btnPad">
+                    <button type="submit" class="orange">확인</button>
+                    <button type="reset" class="grey">취소</button>
+                </div>
+				<input type="hidden" name="mode" value="insertMyForm">
+								<input type="hidden" name="form_id" value="<?= $_REQUEST[form_id] ?>">
+								<input type="hidden" name="form_name" value="<?= $form[form_name] ?>">
+            </form>
+
+        </main>
+
+        <!-- footer 시작 -->
+        <?php include $_SERVER['DOCUMENT_ROOT'].'/mobile/html/common/footer.html'; ?>
+        <!-- footer 끝 -->
+
+    </div>
+
+    <!-- JS -->
+    <script src="../mobile/assets/js/main.js"></script>
+
+</body>
+</html>

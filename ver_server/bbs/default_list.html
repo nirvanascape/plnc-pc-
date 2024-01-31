@@ -1,0 +1,107 @@
+<TABLE border="0" cellpadding="0" cellspacing="0" id="tblL" class="tbl">
+<colgroup><col><col width="55%"><col><col><col></colgroup>
+<TR>
+	<TH>번호</TH>
+	<TH>제목</TH>
+	<TH>작성자</TH>
+	<TH>작성일</TH>
+	<TH>조회</TH>
+</TR>
+
+<?
+$no = $TOTAL - $START;
+$dbnewperiod = '24';
+$newdate = date( "Y-m-d H:i:s", mktime( date( 'H' ) - $dbnewperiod, date( 'i' ), date( 's' ), date( 'm' ), date( 'd' ), date( 'Y' ) ) );
+
+$j = 0;
+while($row = $objdb->sqlFetch($result)){
+	$rwdate = substr($row[wdate],0,10);
+	$chk_lock = $row[chklock];
+	$file_name = $row[clipfile];
+?>
+<TR>
+	<TD><?=$no?></TD>
+	<TD style="text-align:left"><?for($i=0;$i<$row[depth];$i++){?>
+		<?if($i == $row[depth]-1){?>
+			<img src="/img/common/bbsico_re.gif" align="absmiddle" hspace="4">
+			<?}else{?>
+			&nbsp;
+			<?}?>
+	<?}?>
+
+	<?
+		if($RowConf[_read] == 'm' && empty($_USERID)){
+			$linkUrl = "javascript:alert('회원전용입니다.');";
+		}
+		if($chk_lock == 'y'){
+			$linkUrl = "/bbs/bbsPw.html?type=check&mname=".$_REQUEST["mname"]."&subnum=".$_REQUEST["subnum"]."&m_num=".$_REQUEST["m_num"]."&id=".$_REQUEST["id"]."&idx=".$row["idx"]."&page=".$_REQUEST["page"]."&search_word=".$_REQUEST["search_word"]."&field=".$_REQUEST["field"];
+		}else{
+			$linkUrl = "/bbs/bbsView.html?mname=".$_REQUEST["mname"]."&m_num=".$_REQUEST["m_num"]."&subnum=".$_REQUEST["subnum"]."&id=".$_REQUEST["id"]."&idx=".$row["idx"]."&page=".$_REQUEST["page"]."&search_word=".$_REQUEST["search_word"]."&field=".$_REQUEST["field"];
+		}
+	?>
+	<a href="<?=$linkUrl?>">
+	<?=strip_tags($objfunc->str_cut($row[title],50),'<font><b>')?></a>
+	
+	<? if( $row[wdate] > $newdate ){?>
+		<img src='/img/common/bbsico_new.gif' >
+	<?}?>
+	<?=(($row[chklock]==y)?"<img src='/img/common/bbsico_lock.gif'>":'')?>
+	
+	<?
+	if ($file_name){
+		if (eregi( ".(jpg|jpeg|jpe|gif|bmp|pcx|pdf|pdp|tif|tiff)$", $file_name ) ){ ?>
+			<img src="/img/common/bbsico_file.gif">
+		<?}else{ ?>
+			<img src='/img/common/bbsico_file.gif'>
+		<?}
+	}?>
+	<?=(($row[cmt_cnt])?"($row[cmt_cnt])":'')?>
+	</TD>
+	<TD><?=$objfunc->htmlText($row[name])?></TD>
+	<TD><?=$rwdate?></TD>
+	<TD><?=$row[see]?></TD>
+</TR>
+<?
+$no--;
+$j++;
+}
+if ( $j == 0 ){ ?>
+	<TR class='adminwhite'>
+		<TD colspan='6'>등록된 글이 없습니다.</td>
+	</TR>
+<? } ?>
+</TABLE>
+
+<TABLE border="0" cellpadding="0" cellspacing="0" width="100%">
+<TR>
+	<TD width="99%" align="center">
+		<!-- paging -->
+		<? $objfunc->adminPaging2( $PageNo, $PageSize, $TOTAL, '', $bbsQrystr ) ?>
+		<!-- //paging -->
+	</TD>
+<? if ( ($RowConf[_write] == 'f') || ($RowConf[_write] == 'm' && !empty($_USERID)) ){ ?>
+	<TD style="padding-top:9px"><img src="/img/common/bbsbtn_write.gif" onClick='go_write();' class='hand'><!-- 쓰기 있는 게시판만 --></TD>
+<? } ?>
+</TR>
+</TABLE>
+
+
+<!-- search -->
+<form name='search' method='get' action="<?=$_SERVER["PHP_SELF"]?>">
+<div id="bbsSearch">
+	<SELECT NAME='field' class='box'>
+				<OPTION VALUE="title" <?if($_GET[field] == title)echo "selected"?>>제목</option>
+				<OPTION VALUE="comment" <?if($_GET[field] == comment)echo "selected"?>>내용</option>
+				<OPTION VALUE='tplusc' <?if($_GET[field] == tplusc)echo "selected"?>>제목+내용</option>
+				<OPTION VALUE="name" <?if($_GET[field] == name)echo "selected"?>>작성자</option>
+			</SELECT>
+	<INPUT TYPE="text" NAME="search_word" class="formbox" value="<?=$search_word?>">
+	<input type="image" src="/img/common/bbsbtn_search.gif" align="absmiddle">
+	<input type='hidden' name='page' value='<?= $_REQUEST[page] ?>'>
+	<input type='hidden' name='id' value='<?= $_REQUEST[id] ?>'>
+	<input type='hidden' name='mname' value='<?= $_REQUEST[mname] ?>'>
+	<input type='hidden' name='subnum' value='<?= $_REQUEST[subnum] ?>'>
+	<input type='hidden' name='idx' value='<?= $_REQUEST[idx] ?>'>
+</div>
+</form>
+<!-- //search -->

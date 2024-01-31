@@ -1,0 +1,278 @@
+<?
+include $_SERVER["DOCUMENT_ROOT"]."/common/config.inc.php";
+include $_SERVER["DOCUMENT_ROOT"]."/inc/top3.html";
+include $_SERVER["DOCUMENT_ROOT"]."/inc/navi.inc.php";
+
+$idx = $_REQUEST['idx'];
+$id = $_REQUEST['id'];
+$PageNo = $_REQUEST['PageNo'];
+
+include $_SERVER["DOCUMENT_ROOT"]."/inc/bbs_top.html";
+
+$query = "SELECT * FROM bbs_conf WHERE id='".$id."'";
+$RowConf = $objdb->sqlRow( $query );
+
+if(($RowConf[_read] == 'm' && empty($_USERID))){
+	$objfunc->alertBack('회원전용입니다.');
+}
+
+$sql = "SELECT * FROM bbs WHERE idx = '".$idx."'";
+$row = $objdb->sqlRow($sql);
+
+if($row[chklock]=='y'){
+	if($_SESSION['_USERID'] && $row[id]){
+		if( $row[depth] == 0 ){
+			if($_SESSION['_USERID']!= $row[id] ){
+				$objfunc->alertBack('접근권한이 없습니다.');
+			}
+		}else{
+			$prent_thread = ceil($row[thread]/1000)*1000;
+			$sql = "SELECT id FROM bbs WHERE thread = '".$prent_thread."'";
+			$prentId = $objdb->sqlRowOne($sql);
+			if( $_SESSION['_USERID'] != $prentId ){
+				$objfunc->alertBack('접근권한이 없습니다.');
+			}
+		}
+	}
+	else{
+		if($row[pass]){
+			if($row[pass] != $_SESSION['_BBSPW'] && $_SESSION['_BBSCHK'] != 'ok'){
+				$objfunc->alertBack('비밀번호가 일치하지 않습니다.');
+			}
+		}
+		else{
+			$objfunc->alertBack('접근권한이 없습니다.');	
+		}
+	}
+}
+?>
+<SCRIPT LANGUAGE="JavaScript">
+function commChk(){
+	if(comm.rname.value.length==0){
+		alert("이름을 입력하세요");
+		comm.rname.focus();
+		return false;
+	}
+	else if(comm.pass.value.length==0){
+		alert("비밀번호을 입력하세요");
+		comm.pass.focus();
+		return false;
+	}
+	else if(comm.rcomment.value.length==0){
+		alert("내용을 입력하세요");
+		comm.rcomment.focus();
+		return false;
+	}			
+return true;
+}
+
+
+
+</SCRIPT>
+
+
+
+<!-- CONTENTS -->
+
+<?
+
+$see_result= mysql_query ("update bbs set see=see+1 where idx=$idx");
+
+$rwdate = substr($row[wdate],0,10);
+?>
+
+
+
+<header class="sub_header">
+        <div class="container container_header cleafix">
+			<h1 class="logo indent">
+				<a href="/index.html">Logo</a>
+			</h1>
+			<nav>
+				<ul>
+					<li><a href="../about/about_intro.html" data-value="about_intro.html">about</a></li>	
+					<li><a href="../service/service_intro.html" data-value="service_intro.html">service</a></li>	
+                    <li><a href="/bbs/bbsList2.html?id=notice" data-value="bbsList2.html">customer</a></li>	
+                    <li><a href="/recruit/recruit_intro.html" data-value="recruit_intro.html">recruit</a></li>		
+				</ul>
+            </nav>
+            <div class="header_animation">
+                <div class="header_animation_04">
+                    <img src="../images/circle04.png" alt="circle animation3">
+                </div>
+                <div class="header_animation_01">
+                    <img src="../images/circle01.png" alt="circle animation1">
+                </div>
+                <div class="header_animation_02">
+                    <img src="../images/circle_02.png" alt="circle animation2">
+                </div>
+                <div class="header_animation_03">
+                    <img src="../images/circle03.png" alt="circle animation3">
+                </div>
+
+            </div>
+        </div>
+        <p class="main_subj customer_subj">Customer</p>
+ </header><!--/////sub header/////-->
+	
+    <section>
+        <div class="util_menu clearix">
+		<? include $_SERVER["DOCUMENT_ROOT"]."/inc/subtop6.html";?>	
+        </div>
+        <div class="sub_section sub_container">
+            <div class="sub_title sub_title01 clearfix">
+                <div class="sub_title_left">
+                    <img src="../images/app_icon_recruit.png" alt="tmoney app icon">
+                </div>
+                <div class="sub_title_right">
+                    <h4>DL Lounge</h4>
+                    <p>아주편한 차량조회</p>
+                    <div class="app_animate clearfix">
+                        <div class="number_animate" data-rate="4.4">4.4</div>
+                       <div class="stars_animate clearfix">
+                            <div class="stars">
+                                <img src="../images/app_star_empty.png" alt="empty star icon" class="star_empty star_empty1">
+                                <img src="../images/app_star.png" alt="star icon" class="star_scale star_scale1">
+                            </div>
+                            <div class="stars">
+                                <img src="../images/app_star_empty.png" alt="empty star icon" class="star_empty star_empty2">
+                                <img src="../images/app_star.png"  alt="star icon" class="star_scale star_scale2">
+                            </div>
+                            <div class="stars">
+                                <img src="../images/app_star_empty.png" alt="empty star icon" class="star_empty star_empty3">
+                                <img src="../images/app_star.png" alt="star icon" class="star_scale star_scale3">
+                            </div>
+                            <div class="stars">
+                                <img src="../images/app_star_empty.png" alt="empty star icon" class="star_empty star_empty4">
+                                <img src="../images/app_star.png"  alt="star icon" class="star_scale star_scale4">
+                            </div>
+                            <div class="stars">
+                                <img src="../images/app_star_empty.png" alt="empty star icon" class="star_empty star_empty5">
+                                <img src="../images/app_star_half.png"  alt="star icon" class="star_scale star_scale5">
+                            </div>
+                        </div>
+                    </div>
+                    <p><span>100</span>개의 평가</p>
+                </div>
+                <img src="../images/good_gesture01.png" alt="good gesture" class="good_gesture">
+            </div>
+            <div class="tab-wrapper sub_container">
+    
+                 <div>
+                  <div class="active tabs_board">
+                        <div class="tabs_content tabs_content1 customer_tab">
+                            <div class="board">
+                                <table id="tblV" class="tbl tblV" style="border-top:2px solid #262626;">
+                                    <colgroup>
+                                        <col width="800px">
+                                        <col width="200px">
+                                    </colgroup>
+                                    <tbody>
+                                    <tr>
+                                        <td style="text-align:left">
+                                           <?
+											$title = strip_tags($objfunc->str_cut($row[title],50),'<font><b>');
+												if(!$title) $title = "제목없음";
+											?>
+											<?=$title?>
+											
+											<?=(($row[chklock]==y)?'<font color=fdbdbd>(비밀글)</font>':'')?>
+                                        </td>
+                                        <td><?=$rwdate?></td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                              
+							  
+							   <table  id="tblV" class="tbl" style="border-top:none; margin-top:0px; margin-bottom:60px; width:100%">
+								<?if($row[clipfile]){?>
+								<tr>
+									<td colspan="3" class="px11"><span style="margin-right:20px;">첨부파일</span><a href="/bbs/clipfile/<?=$row[clipfile]?>" class='linkmenu'><img src="/img/common/bbsico_file.gif" border='0'><?= download( $row[clipfile], '/bbs/clipfile/' ) ?></a>
+									</td>
+								</tr>
+								<?}?>
+							</table>
+							  
+							  
+							  
+			
+
+<div id="tblView" style='word-break:break-all'  class="fix">
+
+<!-- 포토이미지 있을 경우만 -->
+<?if($row[clipfile]){?>
+<div class="fix">
+<!-- ※이미지가 안보이실 경우 인터넷 익스플로어 도구 -> 인터넷 옵션 -> 고급 -> UFT-8로 보내기를 체크해제 해주세요.<br><br> -->
+<?
+$info = $row[clipfile];
+if((strpos($info,"jpg") || strpos($info,"gif") || strpos($info,"bmp") || strpos($info,"JPG") || strpos($info,"BMP"))){
+	$img_size = getimagesize($_SERVER["DOCUMENT_ROOT"]."/bbs/clipfile/".$info);
+	if($img_size[0] > 670){
+		$width = "670";
+	}else{
+		$width = $img_size[0];
+	}
+echo make_img('/bbs/clipfile/'.$row[clipfile],  $width);
+}
+?>
+</div>
+<?}?>
+<!-- 포토이미지 있을 경우만 -->
+<?= $objfunc->htmlText( $row[comment], $row[htmlcheck] ) ?>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+								
+								<!-- btn -->
+								<div id="btnPad" class="board_button">
+								<? if ( ($RowConf[_write] == 'f') || ($RowConf[_write] == 'm' && !empty($_USERID)) ){ ?>
+								<A HREF="/bbs/bbsWrite.html?<?=$bbsQrystr?>"><img src="/img/common/bbsbtn_write.gif"></A>
+								<?
+									if($RowConf[_type] != "i"){
+								?>
+								
+								<A HREF="/bbs/bbsReply.html?<?=$bbsQrystr?>"><img src="/img/common/bbsbtn_reply.gif"></A>
+								<?
+									} 
+								}
+								if($RowConf[_write]!='a'){
+								?>
+								
+								
+								<A HREF="/bbs/bbsPw.html?type=modify&<?=$bbsQrystr?>"><img src="/img/common/bbsbtn_modi.gif"></A>
+								<A HREF="/bbs/bbsPw.html?type=delete&<?=$bbsQrystr?>"><img src="/img/common/bbsbtn_del.gif" onclick="return confirm('삭제하시겠습니까?')"></A>
+								<?}?>
+								<div class="back_button" style="border-radius:3px;"><a style="color:#ffffff;" href="/bbs/bbsList3.html?<?=$bbsQrystr?>" >목록</a></div>
+								</div>
+								<!-- //btn -->
+
+
+                            </div>
+                        </div>
+                  </div>
+                </div>
+            </div> 	
+        </div>
+    </section>
+
+
+
+
+
+<!-- //CONTENTS -->
+<?
+	include $_SERVER["DOCUMENT_ROOT"]."/inc/bottom2.html";
+?>

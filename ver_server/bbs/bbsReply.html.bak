@@ -1,0 +1,62 @@
+<?
+	include $_SERVER["DOCUMENT_ROOT"]."/inc/top.html";
+
+	$mname = 'help';
+	$subnum = '1';
+
+?>
+<SCRIPT LANGUAGE="JavaScript">
+	var arr_navi	= new Array(
+												"고객지원",
+												"공지사항"
+								);
+</SCRIPT>
+
+<? include $_SERVER["DOCUMENT_ROOT"]."/inc/subtop.html";?>
+
+<!-- CONTENTS -->
+
+
+<? include $_SERVER["DOCUMENT_ROOT"]."/bbs/bbstitle.inc.html";?>
+
+<TABLE border="0" cellpadding="0" cellspacing="0" id="tblW" class="tbl">
+<colgroup><col width="22%"><col width="78%"></colgroup>
+<TR>
+	<TH>작성자</TH>
+	<TD><INPUT TYPE="text" NAME="" class="formbox"></TD>
+</TR>
+<TR>
+	<TH>이메일</TH>
+	<TD><INPUT TYPE="text" NAME="" class="formbox" style="width:60%"> (예 : abcd@abcd.com)</TD>
+</TR>
+<TR>
+	<TH>제목</TH>
+	<TD><INPUT TYPE="password" NAME="" class="formbox w100"></TD>
+</TR>
+<TR>
+	<TH>내용</TH>
+	<TD><TEXTAREA NAME="" class="formbox w100" style="height:300px"></TEXTAREA></TD>
+</TR>
+<TR>
+	<TH>원본글</TH>
+	<TD class="lh16">저희는 쇼핑몰이긴하지만 다양한 컨텐츠및 이벤트가 함께 들어가야해서요. 이 샘플보면 제품위주라. 다른 배너가 없네요. 얼마만큼 변경이 가능한지 알고 싶습니다. 그리고 메인중앙이 플래쉬인데 이 스킨구매시 플래쉬도 가능한건가여? 빠른답변부탁드립니다. </TD>
+</TR>
+<TR>
+	<TH>첨부파일</TH>
+	<TD><INPUT TYPE="file" NAME="" class="formbox w100"></TD>
+</TR>
+<TR>
+	<TH>비밀번호</TH>
+	<TD><INPUT TYPE="password" NAME="" class="formbox"> ( 게시물의 수정/삭제를 위한 비밀번호를 입력해주세요. )</TD>
+</TR>
+
+</TABLE>
+
+<!-- btn -->
+<div id="btnPad"><A HREF="/member/join03.html"><img src="/img/common/btn_ok.gif" hspace="2"></A><A HREF="javascript:history.back();"><img src="/img/common/btn_cancel.gif" hspace="2"></A></div>
+
+<!-- //CONTENTS -->
+<?
+	include $_SERVER["DOCUMENT_ROOT"]."/inc/subbottom.html";
+	include $_SERVER["DOCUMENT_ROOT"]."/inc/bottom.html";
+?>

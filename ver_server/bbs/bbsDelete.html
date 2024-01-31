@@ -1,0 +1,53 @@
+<?
+include $_SERVER["DOCUMENT_ROOT"]."/common/config.inc.php";
+
+$sql = "select pass, id, thread, depth from bbs where idx='".$idx."' ";
+$row = $objdb->sqlRow($sql);
+if($_SESSION['_USERID'] && $row[id]){
+	if($_SESSION['_USERID']!= $row[id]){
+		$objfunc->alertBack('접근권한이 없습니다.');
+	}
+}
+else{
+	if($row[pass]){
+		if($row[pass] != $_SESSION['_BBSPW'] && $_SESSION['_BBSCHK'] != 'ok'){
+			$objfunc->alertBack('비밀번호가 일치하지 않습니다.');
+		}
+	}
+	else{
+		$objfunc->alertBack('접근권한이 없습니다.');	
+	}
+}
+$del_thread=$row[thread];
+$thread = $row[thread]-1; 
+$depth = $row[depth]+1;
+
+$sql="SELECT thread, depth FROM bbs WHERE thread='".$thread."' AND depth='".$depth."' ";
+$row2 =$objdb->sqlRow($sql);
+$n_thread =$row2[thread];
+$n_depth = $row2[depth];
+
+if($thread == $n_thread && $depth == $n_depth){
+	$objfunc->alertBack('답글이 있는 글은 삭제할수 없습니다.');
+}else{
+	if ($thread%1000 > 0) {
+		$prev_parent_thread = floor($thread/1000)*1000; 
+	}else{
+		$prev_parent_thread = $thread - 1000;
+	}
+	$sql = "SELECT clipfile FROM bbs WHERE idx='".$idx."'";
+	$file = $objdb->sqlRowOne($sql);
+	if($file){
+		$objfile->deleteFile($_SERVER["DOCUMENT_ROOT"].'/bbs/clipfile/'.$file);
+	}
+
+	$sql="DELETE FROM bbs WHERE idx = '".$idx."'";
+	$objdb -> sqlExe($sql);
+	
+	$sql = "UPDATE bbs SET thread=thread+1 WHERE thread > $prev_parent_thread AND thread < $thread ";
+	$objdb->sqlExe($sql);
+	$sql = "DELETE FROM comment WHERE bid ='".$idx."'";
+	$objdb->sqlExe($sql);
+	$objfunc->goUrl('/bbs/bbsList.html?'.$bbsQrystr);
+}
+?>

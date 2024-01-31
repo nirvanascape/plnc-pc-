@@ -1,0 +1,131 @@
+    <div class="wrap wrap-notice">
+
+        <!-- header 시작-->
+        <?php include $_SERVER['DOCUMENT_ROOT'].'/mobile/html/common/sub-header-2.html'; ?>
+        <!-- header 끝 -->
+
+        <section class="sub-header">
+
+            <h2 class="sub-title sub-title3">customer</h2>
+            <div class="sub-nav">
+                <div class="sub-select">
+                    <h3 class="sub-select-text">뉴스</h3>
+                    <button class="sub-select-btn"></button>
+                </div>
+                <nav class="lnb">
+                    <a href="notice.html?id=notice" class="nav-item">공지사항</a>
+                    <a href="news.html?id=news" class="nav-item" style="color:#000;">뉴스</a>
+                    <a href="qna.html?form_id=formform" class="nav-item">제품문의</a>
+                </nav>
+            </div>
+
+        </section>
+		
+		<main class="sub-main news">
+
+			<!-- Search 시작-->
+            <form name="search" method="get" action="<?=$_SERVER["PHP_SELF"]?>">
+                <div class="search-area" id="bbsSearch">
+
+					<SELECT NAME='field' class='box'  style="display:none"> 
+						<OPTION VALUE="title" <?if($_GET[field] == title)echo "selected"?>>제목</option>
+						<OPTION VALUE="comment" <?if($_GET[field] == comment)echo "selected"?>>내용</option>
+						<OPTION VALUE='tplusc' <?if($_GET[field] == tplusc)echo "selected"?>>제목+내용</option>
+						<OPTION VALUE="name" <?if($_GET[field] == name)echo "selected"?>>작성자</option>
+					</SELECT>
+
+                    <input type="text" placeholder="Search" title="검색어를 입력하세요" name="search_word" value="<?=$search_word?>">
+                    <button type="submit" class="search">검색버튼</button>
+					<input type='hidden' name='page' value='<?= $_REQUEST[page] ?>'>
+					<input type='hidden' name='id' value='<?= $_REQUEST[id] ?>'>
+					<input type='hidden' name='mname' value='<?= $_REQUEST[mname] ?>'>
+					<input type='hidden' name='subnum' value='<?= $_REQUEST[subnum] ?>'>
+					<input type='hidden' name='idx' value='<?= $_REQUEST[idx] ?>'>
+                </div>
+            </form>
+			<!-- Search 끝-->
+
+            <table class="board-tbl tbl" id="tblL">
+                <caption>게시판 리스트 입니다.</caption>
+				<?
+				$no = $TOTAL - $START;
+				$dbnewperiod = '24';
+				$newdate = date( "Y-m-d H:i:s", mktime( date( 'H' ) - $dbnewperiod, date( 'i' ), date( 's' ), date( 'm' ), date( 'd' ), date( 'Y' ) ) );
+				
+				$j = 0;
+				while($row = $objdb->sqlFetch($result)){
+					$rwdate = substr($row[wdate],0,10);
+					$chk_lock = $row[chklock];
+					$file_name = $row[clipfile];
+				?>
+                <tr>
+                    <td>
+					<?for($i=0;$i<$row[depth];$i++){?>
+						<?if($i == $row[depth]-1){?>
+							<img src="/img/common/bbsico_re.gif" align="absmiddle" hspace="4">
+							<?}else{?>
+							&nbsp;
+							<?}?>
+					<?}?>
+
+					<?
+						if($RowConf[_read] == 'm' && empty($_USERID)){
+							$linkUrl = "javascript:alert('회원전용입니다.');";
+						}
+						if($chk_lock == 'y'){
+							$linkUrl = "/bbs/bbsPw.html?type=check&mname=".$_REQUEST["mname"]."&subnum=".$_REQUEST["subnum"]."&m_num=".$_REQUEST["m_num"]."&id=".$_REQUEST["id"]."&idx=".$row["idx"]."&page=".$_REQUEST["page"]."&search_word=".$_REQUEST["search_word"]."&field=".$_REQUEST["field"];
+						}else{
+							$linkUrl = "/bbs/bbsView_m_news.html?mname=".$_REQUEST["mname"]."&m_num=".$_REQUEST["m_num"]."&subnum=".$_REQUEST["subnum"]."&id=".$_REQUEST["id"]."&idx=".$row["idx"]."&page=".$_REQUEST["page"]."&search_word=".$_REQUEST["search_word"]."&field=".$_REQUEST["field"];
+							}
+						?>
+							
+                        <a href="<?=$linkUrl?>">
+                            <p>
+								<?=strip_tags($objfunc->str_cut($row[title],50),'<font><b>')?>
+								<? if( $row[wdate] > $newdate ){?>
+									<img src='/img/common/bbsico_new.gif' >
+								<?}?>
+								<?=(($row[chklock]==y)?"<img src='/img/common/bbsico_lock.gif'>":'')?>
+								
+								<?
+								if ($file_name){
+									if (eregi( ".(jpg|jpeg|jpe|gif|bmp|pcx|pdf|pdp|tif|tiff)$", $file_name ) ){ ?>
+										<img src="/img/common/bbsico_file.gif">
+									<?}else{ ?>
+										<img src='/img/common/bbsico_file.gif'>
+									<?}
+								}?>
+								<?=(($row[cmt_cnt])?"($row[cmt_cnt])":'')?>
+							</p>
+                            <span class="date"><?=$rwdate?></span>
+                        </a>
+                    </td>
+                </tr>
+				<?
+				$no--;
+				$j++;
+				}
+				if ( $j == 0 ){ ?>
+					<tr class='adminwhite'>
+						<td colspan='6'>등록된 글이 없습니다.</td>
+					</tr>
+				<? } ?>
+            </table>
+
+				<!-- paging -->
+				<? $objfunc->adminPaging4( $PageNo, $PageSize, $TOTAL, '', $bbsQrystr ) ?>
+				<!-- //paging -->
+
+        </main>
+
+        <!-- footer 시작 -->
+        <?php include $_SERVER['DOCUMENT_ROOT'].'/mobile/html/common/footer.html'; ?>
+        <!-- footer 끝 -->
+
+    </div>
+
+    <!-- JS -->
+    <script src="../../assets/js/main.js"></script>
+    
+</body>
+</html>

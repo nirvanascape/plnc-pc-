@@ -1,0 +1,21 @@
+<?
+	$poptitle = '비밀번호 확인';
+	$poptit = 'pw';
+	
+	include $_SERVER["DOCUMENT_ROOT"]."/inc/poptop.html";
+?>
+
+
+<div class="icotx">
+글의 수정/삭제를 위한 비밀번호를 입력해주세요.
+<div class="red"><B>!</B> 비밀번호가 일치하지 않습니다.</div><!-- 불일치 경우에만 -->
+</div>
+<div class="dotbox">
+<font class="black">- 비밀번호</font> <INPUT TYPE="password" NAME="" class="formbox" style="width:50%"><input type="image" src="/img/common/popbtn_ok.gif" align="absmiddle" hspace="3" onclick="location.href='/bbs/pop_memoModify.html';">
+</div>
+
+
+
+<?
+	include $_SERVER["DOCUMENT_ROOT"]."/inc/popbottom.html";
+?>

@@ -1,0 +1,134 @@
+<?
+include $_SERVER["DOCUMENT_ROOT"]."/common/config.inc.php";
+include $_SERVER["DOCUMENT_ROOT"]."/inc/top.html";
+include $_SERVER["DOCUMENT_ROOT"]."/inc/navi.inc.php";
+
+$query = "SELECT * FROM bbs_conf WHERE id='".$_REQUEST[id]."'";
+$RowConf = $objdb->sqlRow( $query );
+
+
+if($_USERLEVEL == '') $_USERLEVEL = 0 ;
+if( $RowConf[chklevel] == y ){
+	if( empty($_USERID) ){
+	$objfunc->alertBack('접근권한이 없습니다');
+	} else {
+		if ( $RowConf["level_$_USERLEVEL"] == y ) {
+			$objfunc->alertBack('접근권한이 없습니다');
+		}
+	}
+}
+if ( ($RowConf[_read] == 'm') && (empty($_USERID)) ){ 
+ $objfunc->alertBack('접근권한이 없습니다');
+}
+
+?>
+<SCRIPT LANGUAGE="JavaScript">
+function write_chk(write){
+	if(write.name.value == '' || write.name.value == null ){
+		alert('작성자를 입력하세요.');
+		write.name.focus();
+		return false;
+	}
+	if(write.title.value == '' || write.title.value == null ){
+		alert('제목을 입력하세요.');
+		write.title.focus();
+		return false;
+	}
+	if(write.comment.value == '' || write.comment.value == null ){
+		alert('내용을 입력하세요.');
+		return false;
+	}
+	if(write.pass.value == '' || write.pass.value == null ){
+		alert('비밀번호를 입력하세요.');
+		write.pass.focus();
+		return false;
+	}
+}
+function go_view() {
+	self.location = "/bbs/bbsView.html?<?=$bbsQrystr?>";
+}
+</SCRIPT>
+
+<? include $_SERVER["DOCUMENT_ROOT"]."/inc/subtop.html";?>
+
+<!-- CONTENTS -->
+
+
+<? include $_SERVER["DOCUMENT_ROOT"]."/bbs/bbstitle.inc.html";?>
+<?
+
+
+$sql = "SELECT thread,depth,title,comment, chklock, pass FROM bbs WHERE idx=$idx";
+$result = $objdb->sqlResult($sql);
+$parent_fetch = $objdb->sqlFetch($result);
+
+$parent_thread = $parent_fetch[0];
+$parent_depth = $parent_fetch[1];
+$parent_title = $parent_fetch[2];
+$parent_comment = $parent_fetch[3];
+$parent_chklock = $parent_fetch[4];
+$parent_pass = $parent_fetch[5];
+
+?>
+<TABLE border="0" cellpadding="0" cellspacing="0" id="tblM" class="tbl">
+<colgroup><col width="18%"><col width="82%"></colgroup>
+<form name='write' action="/bbs/insert_Reply.html?<?=$bbsQrystr?>" method='post' ENCTYPE="multipart/form-data" onSubmit='return write_chk(write)'>
+<input type='hidden' name='parent_depth' value="<?=$parent_depth?>">
+<input type='hidden' name='parent_thread' value="<?=$parent_thread?>">
+<input type='hidden' name='parent_chklock' value="<?=$parent_chklock?>">
+<? if( !empty($_USERID) ) { ?>
+<input type='hidden' name='userid' value='<?= $_USERID ?>'>
+<? } ?>
+<TR>
+	<TH>작성자</TH>
+	<TD><INPUT TYPE="text" NAME="name" class="formbox" value='<?= $_USERNAME ?>'></TD>
+</TR>
+<TR>
+	<TH>이메일</TH>
+	<TD><INPUT TYPE="text" NAME="email" class="formbox" style="width:60%" value='<?= $_USEREMAIL ?>'> (예 : abcd@abcd.com)</TD>
+</TR>
+<TR>
+	<TH>제목</TH>
+	<TD><INPUT TYPE="text" NAME="title" class="formbox w100" value="<?= $objfunc->htmlText($parent_title)?>"></TD>
+</TR>
+<TR>
+	<TH>내용</TH>
+	<TD>
+	<?
+			include $_SERVER['DOCUMENT_ROOT'].'/common/new_editor/spaw_control.class.php';
+			$sw = new SPAW_Wysiwyg( 'comment', '', '100%', '300px', false, "default" );
+			$sw->show();
+	?>
+	</TD>
+</TR>
+<TR>
+	<TH>원본글</TH>
+	<TD class="lh16">
+	<?= nl2br($parent_comment)?>
+	</TD>
+</TR>
+<TR>
+	<TH>첨부파일</TH>
+	<TD><INPUT TYPE="file" NAME="clipfile" class="formbox w100"></TD>
+</TR>
+<? if ( !$_USERID ){?>
+<? if( $parent_chklock != 'y' ) { ?>
+<TR>
+	<TH>비밀번호</TH>
+	<TD><INPUT TYPE="password" NAME="pass" class="formbox"> ( 게시물의 수정/삭제를 위한 비밀번호를 입력해주세요. )</TD>
+</TR>
+<? }else{ ?>
+	<INPUT TYPE="hidden" NAME="pass" value='<?= $parent_pass ?>'>
+<? } ?>
+<? } ?>
+</TABLE>
+
+<!-- btn -->
+<div id="btnPad"><input type='image' src="/img/common/btn_ok.gif"><A HREF="javascript:go_view();"><img src="/img/common/btn_cancel.gif" hspace="2"></A></div>
+</form>
+
+<!-- //CONTENTS -->
+<?
+	include $_SERVER["DOCUMENT_ROOT"]."/inc/subbottom.html";
+	include $_SERVER["DOCUMENT_ROOT"]."/inc/bottom.html";
+?>

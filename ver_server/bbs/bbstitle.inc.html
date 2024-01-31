@@ -1,0 +1,16 @@
+<?
+if($RowConf[titleimg] && $RowConf[chktitle] == "y"){
+	$info = getimagesize($_SERVER["DOCUMENT_ROOT"]."/upload_img/bbs_img/".$RowConf[titleimg]);
+		if($info[0] > 300){
+			$width = 300;
+		}else{
+			$width = $info[0];
+		}
+?>
+	<div align='left'><img src="/upload_img/bbs_img/<?=$RowConf[titleimg]?>" width="<?=$width?>"></div>
+<?
+} else {	
+?>
+	<div id="sTit"><?=$RowConf[title]?></div>
+<?}?>
+<!-- <div id="sTit"><img src="/img/common/tit/st_<?=$mname?><?=$subnum?>.gif"></div> -->

@@ -1,0 +1,172 @@
+<!-- CONTENTS -->
+		<p class="main_subj customer_subj">Customer</p>
+  </header><!--/////sub header/////-->
+    <section>
+        <div class="util_menu clearix">
+            <ul class="clearfix sub_container">
+                <li><img src="../images/homemenu_icon.png" alt="home icon"></li>
+                <li><h3>Home</h3></li>
+                <li>&gt;</li>
+                <li><h3>Service</h3></li>
+                <li>&gt;</li>
+                <li><h3 class="change_text">공지사항</h3></li>
+            </ul>
+        </div>
+        <div class="sub_section sub_container">
+            <div class="sub_title sub_title01 clearfix">
+                <div class="sub_title_left">
+                    <img src="../images/app_icon_customer.png" alt="tmoney app icon">
+                </div>
+                <div class="sub_title_right">
+                    <h4>Evro</h4>
+                    <p>전기차 모바일멤버쉽</p>
+                    <div class="app_animate clearfix">
+                        <div class="number_animate" data-rate="3.5">3.5</div>
+                        <div class="stars_animate clearfix">
+                            <div class="stars">
+                                <img src="../images/app_star_empty.png" alt="empty star icon" class="star_empty star_empty1">
+                                <img src="../images/app_star.png" alt="star icon" class="star_scale star_scale1">
+                            </div>
+                            <div class="stars">
+                                <img src="../images/app_star_empty.png" alt="empty star icon" class="star_empty star_empty2">
+                                <img src="../images/app_star.png"  alt="star icon" class="star_scale star_scale2">
+                            </div>
+                            <div class="stars">
+                                <img src="../images/app_star_empty.png" alt="empty star icon" class="star_empty star_empty3">
+                                <img src="../images/app_star.png" alt="star icon" class="star_scale star_scale3">
+                            </div>
+                            <div class="stars">
+                                <img src="../images/app_star_empty.png" alt="empty star icon" class="star_empty star_empty4">
+                                <img src="../images/app_star_half.png"  alt="star icon" class="star_scale star_scale4">
+                            </div>
+                            <div class="stars">
+                                <img src="../images/app_star_empty.png" alt="empty star icon" class="star_empty star_empty5">
+                                <!-- <img src="../images/app_star.png"  alt="star icon" class="star_scale star_scale5"> --> 
+                            </div>
+                        </div>
+                    </div>
+                    <p><span>48</span>개의 평가</p>
+                </div>
+                <img src="../images/good_gesture01.png" alt="good gesture" class="good_gesture">
+            </div>
+             <div class="tab-wrapper2 sub_container opacity_an">
+                 <ul class="tab-menu2 tab_about clearfix">
+                    <li><a href="/bbs/bbsList2.html?id=notice" class="active">공지사항</a></li>
+                    <li><a href="/bbs/bbsList2.html?id=news">뉴스</a></li>
+                    <li><a href="/bbs/goodsAsk2.html?form_id=formform">제품문의</a></li>
+                </ul>
+				
+                <hr class="tab_hr about_hr" style="left:-333px;">
+                <div>
+                  <div>
+                        <div class="tabs_content tabs_content1 customer_tab" style="margin-top:50px;">
+                           
+						   
+							<!-- search -->
+							<form name='search' method='get' action="<?=$_SERVER["PHP_SELF"]?>">
+								<div id="bbsSearch">
+									
+									<SELECT NAME='field' class='box'  style="display:none"> 
+										<OPTION VALUE="title" <?if($_GET[field] == title)echo "selected"?>>제목</option>
+										<OPTION VALUE="comment" <?if($_GET[field] == comment)echo "selected"?>>내용</option>
+										<OPTION VALUE='tplusc' <?if($_GET[field] == tplusc)echo "selected"?>>제목+내용</option>
+										<OPTION VALUE="name" <?if($_GET[field] == name)echo "selected"?>>작성자</option>
+									</SELECT>
+									
+									<INPUT TYPE="text" NAME="search_word" class="formbox" value="<?=$search_word?>" placeholder="검색어 입력">
+									<input type="submit" value="검색하기">
+									<input type='hidden' name='page' value='<?= $_REQUEST[page] ?>'>
+									<input type='hidden' name='id' value='<?= $_REQUEST[id] ?>'>
+									<input type='hidden' name='mname' value='<?= $_REQUEST[mname] ?>'>
+									<input type='hidden' name='subnum' value='<?= $_REQUEST[subnum] ?>'>
+									<input type='hidden' name='idx' value='<?= $_REQUEST[idx] ?>'>
+								</div>
+							</form>
+							<!-- //search -->
+         				
+						<table id="tblL" class="tbl">
+							<colgroup>
+                                    <col width="800px">
+                                    <col width="200px">
+                                </colgroup>
+								 <tbody>
+							
+							<?
+							$no = $TOTAL - $START;
+							$dbnewperiod = '24';
+							$newdate = date( "Y-m-d H:i:s", mktime( date( 'H' ) - $dbnewperiod, date( 'i' ), date( 's' ), date( 'm' ), date( 'd' ), date( 'Y' ) ) );
+							
+							$j = 0;
+							while($row = $objdb->sqlFetch($result)){
+								$rwdate = substr($row[wdate],0,10);
+								$chk_lock = $row[chklock];
+								$file_name = $row[clipfile];
+							?>
+							<tr>
+								<!--<TD><?=$no?></TD>-->
+								<td style="text-align:left"><?for($i=0;$i<$row[depth];$i++){?>
+									<?if($i == $row[depth]-1){?>
+										<img src="/img/common/bbsico_re.gif" align="absmiddle" hspace="4">
+										<?}else{?>
+										&nbsp;
+										<?}?>
+								<?}?>
+							
+								<?
+									if($RowConf[_read] == 'm' && empty($_USERID)){
+										$linkUrl = "javascript:alert('회원전용입니다.');";
+									}
+									if($chk_lock == 'y'){
+										$linkUrl = "/bbs/bbsPw.html?type=check&mname=".$_REQUEST["mname"]."&subnum=".$_REQUEST["subnum"]."&m_num=".$_REQUEST["m_num"]."&id=".$_REQUEST["id"]."&idx=".$row["idx"]."&page=".$_REQUEST["page"]."&search_word=".$_REQUEST["search_word"]."&field=".$_REQUEST["field"];
+									}else{
+										$linkUrl = "/bbs/bbsView2.html?mname=".$_REQUEST["mname"]."&m_num=".$_REQUEST["m_num"]."&subnum=".$_REQUEST["subnum"]."&id=".$_REQUEST["id"]."&idx=".$row["idx"]."&page=".$_REQUEST["page"]."&search_word=".$_REQUEST["search_word"]."&field=".$_REQUEST["field"];
+									}
+								?>
+								<a href="<?=$linkUrl?>">
+								<?=strip_tags($objfunc->str_cut($row[title],50),'<font><b>')?></a>
+								
+								<? if( $row[wdate] > $newdate ){?>
+									<img src='/img/common/bbsico_new.gif' >
+								<?}?>
+								<?=(($row[chklock]==y)?"<img src='/img/common/bbsico_lock.gif'>":'')?>
+								
+								<?
+								if ($file_name){
+									if (eregi( ".(jpg|jpeg|jpe|gif|bmp|pcx|pdf|pdp|tif|tiff)$", $file_name ) ){ ?>
+										<img src="/img/common/bbsico_file.gif">
+									<?}else{ ?>
+										<img src='/img/common/bbsico_file.gif'>
+									<?}
+								}?>
+								<?=(($row[cmt_cnt])?"($row[cmt_cnt])":'')?>
+								</td>
+								<!--<td><?=$objfunc->htmlText($row[name])?></td>-->
+								<td><?=$rwdate?></td>
+								<!--<td><?=$row[see]?></td>-->
+							</tr>
+							<?
+							$no--;
+							$j++;
+							}
+							if ( $j == 0 ){ ?>
+								<tr class='adminwhite'>
+									<td colspan='6'>등록된 글이 없습니다.</td>
+								</tr>
+							<? } ?>
+							</tbody>
+							</table>
+				
+								<!-- paging -->
+								<? $objfunc->adminPaging3( $PageNo, $PageSize, $TOTAL, '', $bbsQrystr ) ?>
+								<!-- //paging -->
+							
+						
+
+       
+                      </div>
+                  </div>
+                </div>
+            </div> 	
+        </div>
+    </section>
+<!-- //CONTENTS -->

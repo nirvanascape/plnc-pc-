@@ -1,0 +1,161 @@
+<?
+include $_SERVER["DOCUMENT_ROOT"]."/common/config.inc.php";
+include $_SERVER["DOCUMENT_ROOT"]."/inc/top.html";
+include $_SERVER["DOCUMENT_ROOT"]."/inc/navi.inc.php";
+
+$sql ="SELECT * FROM bbs WHERE idx = '".$idx."'";
+$row = $objdb->sqlRow($sql);
+
+if($mode!='reload' ){
+	if($_SESSION['_USERID'] && $row[id]){
+		if($_SESSION['_USERID']!= $row[id]){
+			$objfunc->alertBack('접근권한이 없습니다.');
+		}
+	}
+	else{
+		if($row[pass]){
+			if($row[pass] != $_SESSION['_BBSPW'] && $_SESSION['_BBSCHK'] != 'ok'){
+				$objfunc->alertBack('비밀번호가 일치하지 않습니다.');
+			}
+		}
+		else{
+			$objfunc->alertBack('접근권한이 없습니다.');	
+		}
+	}
+}
+
+$query = "SELECT * FROM bbs_conf WHERE id='".$_REQUEST["id"]."'";
+$RowConf = $objdb->sqlRow( $query );
+
+if($_USERLEVEL == '') $_USERLEVEL = 0 ;
+if( $RowConf[chklevel] == y ){
+	if( empty($_USERID) ){
+		$objfunc->alertBack('접근권한이 없습니다');
+	} else {
+		if ( $RowConf["level_".$_USERLEVEL] == y ) {
+			$objfunc->alertBack('접근권한이 없습니다');
+		}
+	}
+}
+
+if ( $mode == 'reload' ){
+$title = $_REQUEST['title'];
+$htmlcheck = $_REQUEST['htmlcheck'];
+$comment = $_REQUEST['comment'];
+$chklock = $_REQUEST['chklock'];
+$email = $_REQUEST['email'];
+$file = $_REQUEST['file'];
+	if(!trim($title)){
+	$title = '글제목 없음';
+	}
+	if(empty($htmlcheck)) $htmlcheck = 'n';
+
+	if(!empty($_FILES[clipfile][name])){
+		$sql = "SELECT clipfile FROM bbs WHERE idx='".$idx."'";
+		$file = $objdb->sqlRowOne($sql);
+
+		if($file){
+			$objfile->deleteFile($_SERVER["DOCUMENT_ROOT"].'/bbs/clipfile/'.$file);
+		}
+
+		$file_name = ($_FILES[clipfile][name]);
+		$img_dir=$_SERVER["DOCUMENT_ROOT"]."/bbs/clipfile/";
+		$filename = $objfile->uploadFile($_FILES[clipfile][tmp_name], $file_name, $img_dir, true );
+				
+		$sql="UPDATE bbs SET title='$title', comment='$comment', chklock='$chklock', clipfile='$filename', htmlcheck='$htmlcheck', email='$email' WHERE idx=$idx";
+		$objdb->sqlExe($sql);	
+		
+	}else{
+		$sql="UPDATE bbs SET title='$title', comment='$comment', chklock='$chklock', htmlcheck='$htmlcheck', email='$email' WHERE idx=$idx";
+		$objdb->sqlExe($sql);	
+	}
+	$url = "/bbs/bbsView.html?".$bbsQrystr;
+	$objfunc->goParent($url);
+}
+
+?>
+<SCRIPT LANGUAGE="JavaScript">
+
+function modi_chk(form){
+	form = document.bbsmodi;
+	if(form.title.value == '' || form.title.value == null ){
+		alert('제목을 입력하세요.');
+		form.title.focus();
+		return false;
+	}
+	else if(form.comment.value == '' || form.comment.value == null ){
+		alert('내용을 입력하세요.');
+		return false;
+	}
+}
+
+</SCRIPT>
+<? include $_SERVER["DOCUMENT_ROOT"]."/inc/subtop.html";?>
+
+<!-- CONTENTS -->
+
+
+<? include $_SERVER["DOCUMENT_ROOT"]."/bbs/bbstitle.inc.html";?>
+
+
+<form name='bbsmodi' method='post' target='exeFrame' ENCTYPE="multipart/form-data" onSubmit='return modi_chk(this);'>
+<input type='hidden' name='mode' value='reload'>
+<input type='hidden' name='htmlcheck' value='y'>
+<TABLE border="0" cellpadding="0" cellspacing="0" id="tblM" class="tbl">
+<colgroup><col width="18%"><col width="82%"></colgroup>
+<TR>
+	<TH>작성자</TH>
+	<TD><?=$objfunc->htmlText($row[name])?></TD>
+</TR>
+<TR>
+	<TH>이메일</TH>
+	<TD>
+		<input type='text' name='email' value='<?= $row[email]?>' class='formbox' style="width:60%">
+	</TD>
+</TR>
+<TR>
+	<TH>제목</TH>
+	<TD><INPUT TYPE="text" NAME="title" class="formbox w100" value="<?=$objfunc->htmlText($row[title])?>"></TD>
+</TR>
+<TR>
+	<TH>내용</TH>
+	<TD>
+	<?
+		$dbcomment=$row[comment];
+		include $_SERVER['DOCUMENT_ROOT'].'/common/new_editor/spaw_control.class.php';
+		$sw = new SPAW_Wysiwyg( 'comment', $dbcomment, '100%', '300px', false, "default" );
+		$sw->show();
+	?>
+	</TD>
+</TR>
+<TR>
+	<TH>첨부파일</TH>
+	<TD><INPUT TYPE="file" NAME="clipfile" class="formbox w100"></TD>
+</TR>
+<? if( $row[chklock] != 'y' || $row[depth] == 0  ) { ?>
+<TR>
+	<TH>공개여부</TH>
+	<TD>
+	<font class="dgray sp">
+	<INPUT TYPE="radio" NAME="chklock" value='n' <?=(($row[chklock]==n)?'checked':'')?>>
+	공개&nbsp;&nbsp;&nbsp;
+	<INPUT TYPE="radio" NAME="chklock" value='y' <?=(($row[chklock]==y)?'checked':'')?>>
+	비공개
+	</font> (작성자와 관리자만 확인할 수 있습니다.)
+	</TD>
+</TR>
+<? } ?>
+</TABLE>
+
+
+<div id="btnPad"><input type="image" src="/img/common/btn_ok.gif" hspace="2"><A HREF="#" onClick="history.back();"><img src="/img/common/btn_cancel.gif" hspace="2"></A></div>
+</form>
+
+<!-- btn -->
+<!-- <div id="btnPad"><A HREF="#" onClick="modi_chk();"><img src="/img/common/btn_ok.gif" hspace="2"></A><A HREF="#" onClick="go_list();"><img src="/img/common/btn_cancel.gif" hspace="2"></A></div> -->
+
+<!-- //CONTENTS -->
+<?
+	include $_SERVER["DOCUMENT_ROOT"]."/inc/subbottom.html";
+	include $_SERVER["DOCUMENT_ROOT"]."/inc/bottom.html";
+?>

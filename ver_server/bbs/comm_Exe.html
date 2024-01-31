@@ -1,0 +1,22 @@
+<?php
+session_start();
+include $_SERVER['DOCUMENT_ROOT'].'/common/config.inc.php';
+$board_id = $_REQUEST[board_id];
+$idx = $_REQUEST[idx];
+$page_no = $_REQUEST[page_no];
+
+$pass = $_REQUEST["pass"];
+$bid = $idx;
+$rname = $_REQUEST["rname"];
+
+//코멘트 등록0
+$sql = " INSERT INTO comment VALUES ('','".$bid."','".$rname."','".$pass."','".$rcomment."',sysdate())";
+$result = mysql_query($sql);
+
+// 코멘드가 등록되었으니 원문의 comment count 를 하나 증가
+$sql = " UPDATE bbs SET cmt_cnt=cmt_cnt+1 WHERE idx='".$bid."'";
+$result = mysql_query($sql);
+?>
+<script>
+	history.back();
+</script>

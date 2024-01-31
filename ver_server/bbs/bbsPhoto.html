@@ -1,0 +1,119 @@
+<?
+	include $_SERVER["DOCUMENT_ROOT"]."/inc/top.html";
+
+	$mname = 'community';
+	$subnum = '1';
+
+?>
+<SCRIPT LANGUAGE="JavaScript">
+	var arr_navi	= new Array(
+												"커뮤니티",
+												"포토 갤러리"
+								);
+</SCRIPT>
+
+<? include $_SERVER["DOCUMENT_ROOT"]."/inc/subtop.html";?>
+
+<!-- CONTENTS -->
+
+
+<? include $_SERVER["DOCUMENT_ROOT"]."/bbs/bbstitle.inc.html";?>
+
+<TABLE border="0" cellpadding="0" cellspacing="0" id="tblP" class="tbl">
+<TR>
+	<TH><img src="/img/common/space.gif"></TH>
+	<TH><img src="/img/common/space.gif"></TH>
+	<TH><img src="/img/common/space.gif"></TH>
+	<TH><img src="/img/common/space.gif"></TH>
+</TR>
+<TR>
+	<TD>
+		<div class="img"><A HREF="/bbs/bbsView.html"><img src="/img/common/bbs_testimg.gif"></A></div>
+		<div class="subject"><A HREF="/bbs/bbsView.html">산 정상에 올라보니 이루 말할 수 없는 기쁨에</A></div>
+		<div class="writer">꿈에그린 <font class="verdana sp">(04/24)</font></div>
+	</TD>
+	<TD>
+		<div class="img"><A HREF="/bbs/bbsView.html"><img src="/img/common/bbs_testimg.gif"></A></div>
+		<div class="subject"><A HREF="/bbs/bbsView.html">산 정상에 올라보니 이루 말할 수 없는 기쁨에</A></div>
+		<div class="writer">꿈에그린 <font class="verdana sp">(04/24)</font></div>
+	</TD>
+	<TD>
+		<div class="img"><A HREF="/bbs/bbsView.html"><img src="/img/common/bbs_testimg.gif"></A></div>
+		<div class="subject"><A HREF="/bbs/bbsView.html">산 정상에 올라보니 이루 말할 수 없는 기쁨에</A></div>
+		<div class="writer">꿈에그린 <font class="verdana sp">(04/24)</font></div>
+	</TD>
+	<TD>
+		<div class="img"><A HREF="/bbs/bbsView.html"><img src="/img/common/bbs_testimg.gif"></A></div>
+	</TD>
+</TR>
+<TR>
+	<TD>
+		<div class="img"><A HREF="/bbs/bbsView.html"><img src="/img/common/bbs_testimg.gif"></A></div>
+		<div class="subject"><A HREF="/bbs/bbsView.html">산 정상에 올라보니 이루 말할 수 없는 기쁨에</A></div>
+		<div class="writer">꿈에그린 <font class="verdana sp">(04/24)</font></div>
+	</TD>
+	<TD>
+		<div class="img"><A HREF="/bbs/bbsView.html"><img src="/img/common/bbs_testimg.gif"></A></div>
+		<div class="subject"><A HREF="/bbs/bbsView.html">산 정상에 올라보니 이루 말할 수 없는 기쁨에</A></div>
+		<div class="writer">꿈에그린 <font class="verdana sp">(04/24)</font></div>
+	</TD>
+	<TD>
+		<div class="img"><A HREF="/bbs/bbsView.html"><img src="/img/common/bbs_testimg.gif"></A></div>
+		<div class="subject"><A HREF="/bbs/bbsView.html">산 정상에 올라보니 이루 말할 수 없는 기쁨에</A></div>
+		<div class="writer">꿈에그린 <font class="verdana sp">(04/24)</font></div>
+	</TD>
+	<TD>
+		<div class="img"><A HREF="/bbs/bbsView.html"><img src="/img/common/bbs_testimg.gif"></A></div>
+		<div class="subject"><A HREF="/bbs/bbsView.html">산 정상에 올라보니 이루 말할 수 없는 기쁨에</A></div>
+		<div class="writer">꿈에그린 <font class="verdana sp">(04/24)</font></div>
+	</TD>
+</TR>
+</TABLE>
+
+<TABLE border="0" cellpadding="0" cellspacing="0" width="100%">
+<TR>
+	<TD width="99%" align="center">
+		<!-- paging -->
+		<TABLE border="0" cellpadding="0" cellspacing="3" id="paging">
+		<TR>
+			<TD><A HREF=""><img src="/img/common/bbsbtn_pre02.gif"></A></TD>
+			<TD><A HREF=""><img src="/img/common/bbsbtn_pre01.gif"></A></TD>
+			<TD class="pad">
+				<A HREF="">1</A>
+				<font class="this">2</font>
+				<A HREF="">3</A>
+				<A HREF="">4</A>
+				<A HREF="">5</A>
+				<A HREF="">6</A>
+				<A HREF="">7</A>
+			</TD>
+			<TD><A HREF=""><img src="/img/common/bbsbtn_next01.gif"></A></TD>
+			<TD><A HREF=""><img src="/img/common/bbsbtn_next02.gif"></A></TD>
+			<TD class="total">(<font class="this">2</font>/11)</TD>
+		</TR>
+		</TABLE>
+		<!-- //paging -->
+	</TD>
+	<TD style="padding-top:9px"><A HREF="/bbs/bbsWrite.html"><img src="/img/common/bbsbtn_write.gif"></A><!-- 쓰기 있는 게시판만 --></TD>
+</TR>
+</TABLE>
+
+
+<!-- search -->
+<div id="bbsSearch">
+	<SELECT NAME='field'>
+		<OPTION VALUE="title" >제목</option>
+		<OPTION VALUE="comment" >내용</option>
+		<OPTION VALUE='tplusc' >제목+내용</option>
+		<OPTION VALUE="name" >작성자</option>
+	</SELECT>
+	<INPUT TYPE="text" NAME="search_word" class="formbox" style="width:45%;height:20px" value="">
+	<input type="image" src="/img/common/bbsbtn_search.gif" align="absmiddle">
+</div>
+<!-- //search -->
+
+<!-- //CONTENTS -->
+<?
+	include $_SERVER["DOCUMENT_ROOT"]."/inc/subbottom.html";
+	include $_SERVER["DOCUMENT_ROOT"]."/inc/bottom.html";
+?>
