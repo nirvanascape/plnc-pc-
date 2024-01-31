@@ -1,0 +1,49 @@
+<?php
+$query = "SELECT * FROM bbs_conf ORDER BY title ";
+$result = $objdb->sqlResult( $query );
+$cnt = $objdb->sqlNumRows( $query );
+?>
+<SCRIPT>
+function go_list( id ) {
+	self.location = "/admin/bbs/index.html?page=bbslist&id="+id;
+}
+</SCRIPT>
+
+<div align='center'>
+<table border='0' cellpadding='1' cellspacing='0' width='90%'>
+	<tr>
+		<td class='title alignleft'>게시판 관리</td>
+	</tr>
+</table>
+<table width='70%'>
+	<tr>
+		<td class='bold alignleft'>총 <font class='red'><?= $cnt ?></font> 게시판</td>
+	</tr>
+</table>
+<table width='70%' class='admintbl' cellpadding='7' cellspacing='1'>
+	<tr class='admintitle'>
+		<td>게시판이름</td>
+		<td>등록된 글</td>
+	</tr>
+<?
+$i = 0;
+while ($row = $objdb->sqlFetch($result)) {
+$BbsSql = "SELECT COUNT(*) FROM bbs where board_id='".$row[id]."'";
+$RowCnt = $objdb->sqlRowOne( $BbsSql );
+?>
+	<tr class='adminwhite'>
+		<td><a href="javascript:go_list('<?= $row[id]?>');" class='linkmenu'><?= $row[title] ?></a></td>
+		<td><?= ($RowCnt=='0'?'글없음' : $RowCnt )  ?></td>
+	</tr>
+<?$i++;?>
+<? } ?>
+<? if( $i == 0 ) { ?>
+	<tr class='adminwhite' align='center'>
+		<td colspan='3'>등록된 게시판이 없습니다</td>
+	</tr>
+<? } ?>
+</table>
+<table>
+<tr><td></td></tr>
+</table>
+</div>

@@ -1,0 +1,20 @@
+<?php
+session_start();
+include $_SERVER['DOCUMENT_ROOT'].'/common/config.inc.php';
+$id = $_REQUEST[id];
+$idx = $_REQUEST[idx];
+$PageNo = $_REQUEST[PageNo];
+
+$ad_sql = "SELECT password FROM authorised_user";
+$ad_pass = $objdb->sqlRowOne( $ad_sql );
+$bid = $idx;
+$rname = '°ü¸®ÀÚ';
+
+$sql = " INSERT INTO comment VALUES ('','".$bid."','".$rname."','".$ad_pass."','".$rcomment."',sysdate())";
+$result = mysql_query( $sql );
+$sql = " UPDATE bbs SET cmt_cnt=cmt_cnt+1 WHERE idx='".$bid."'";
+$result = mysql_query( $sql );
+?>
+<script>
+	document.location="/admin/bbs/index.html?page=bbsview&id=<?=$id?>&idx=<?=$_GET[idx]?>&PageNo=<?=$PageNo?>";
+</script>

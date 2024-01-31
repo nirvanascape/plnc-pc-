@@ -1,0 +1,214 @@
+<?php
+$AddId = trim($_POST['AddId']);
+$AddName = trim($_POST['AddName']);
+$bbsName = trim($_POST['bbsName']);
+if( $_POST['mode'] == 'reload' ){
+	$query = "SELECT count(*) FROM bbs_conf where id ='".$AddId."' ";
+	$row = $objdb->sqlRow($query);
+	if ( $row[0] ){
+		$rtn = $objfunc->alert('사용중인 id 입니다.', false);
+		return $rtn;
+	} else {
+		$query = "INSERT INTO bbs_conf (id, title, wdate) VALUES ('".$AddId."','".$AddName."',sysdate())";
+		$objdb->sqlExe($query);
+	}
+	$objfunc->reloadParent('새 게시판 생성');
+}
+if( $_POST['mode'] == 'bbsCate' ) {
+	$query = "INSERT INTO bbs_category (idx, name) VALUES ('','".$bbsName."')";
+	$objdb->sqlExe($query);
+	$objfunc->reloadParent('새 분류 생성');
+}
+?>
+<SCRIPT>
+function bbs_Form() {
+	var f = document.bbsForm;
+		if( f.AddId.value == '' || f.AddId.value == null ){
+			alert('아이디를 입력하세요');
+			f.AddId.focus();
+			return false;
+		}
+		if( f.AddName.value == '' || f.AddName.value == null ){
+			alert('이름을 입력하세요');
+			f.AddName.focus();
+			return false;
+		}
+}
+function bbs_Cate() {
+	var f = document.bbsCate;
+		if( f.bbsName.value == '' || f.bbsName.value == null ){
+			alert('이름을 입력하세요');
+			f.bbsName.focus();
+			return false;
+		}
+}
+
+function go_del( id ){
+		if( confirm('삭제하시겠습니까?')){
+			if( confirm('등록된 글도 삭제됩니다. 정말 삭제하시겠습니까?'))
+			{
+			self.location = "/admin/bbs/delete.html?page=info&type=bbsConf&id="+id;
+			}
+		}
+	}
+function go_cate_del( idx ){
+		if( confirm('삭제하시겠습니까?')){
+			if( confirm('등록된 글도 삭제됩니다. 정말 삭제하시겠습니까?'))
+			{
+			self.location = "/admin/bbs/delete.html?page=info&type=bbsCate&id="+idx;
+			}
+		}
+	}
+function go_modi( id ){
+		self.location = "/admin/bbs/index.html?page=infomodi&id="+id;
+	}
+function go_list( id ) {
+	self.location = "/admin/bbs/index.html?page=bbslist&id="+id;
+}
+function go_goodAsk() {
+	self.location = "/admin/bbs/index.html?page=goodAsk";
+}
+</SCRIPT>
+<?
+$query = "SELECT * FROM bbs_conf ORDER BY wdate DESC";
+$result = $objdb->sqlResult( $query );
+?>
+<TABLE width='90%' >
+	<TR>
+		<TD class='title'>게시판 설정</TD>
+	</TR>
+</TABLE>
+
+<div class="dotbox">
+<ul>
+	<li>게시판 추가 후에는 반드시 "<font class="bold red">/inc/menuTemplate.inc.php</font>"에서 메뉴 정보를 입력 하셔야만 완전하게 보실 수 있습니다.</li>
+	<li>게시판 "<B>이름</B>"을 클릭하시면 해당 게시판 리스트를 확인하실 수 있습니다. </li>
+</ul>
+</div>
+
+<TABLE width='90%'>
+	<TR>
+		<TD class='subtitle'>게시판 목록</TD>
+	</TR>
+</TABLE>
+<TABLE width='90%' class='admintbl' cellpadding='7'>
+	<TR class='admintitle'>
+		<TD>이름</TD>
+		<TD>주소</TD>
+		<TD>등록된 글</TD>
+		<TD>기능</TD>
+	</TR>
+	<?
+	$i = 0;
+	$toDay = date("Y-m-d");
+	while ($row = $objdb->sqlFetch($result)) {
+		$sql = "SELECT COUNT(*) FROM bbs WHERE board_id='".$row[id]."'";
+		$totalCnt = $objdb->sqlRowOne( $sql );
+		$sql = "SELECT COUNT(*) FROM bbs WHERE board_id='".$row[id]."' AND left(wdate,10) = '".$toDay."'";
+		$toDayCnt = $objdb->sqlRowOne( $sql );
+	?>
+	<TR class='adminwhite' align='center'> 
+		<TD>
+			<a href="javascript:go_list('<?= $row[id]?>');" class='linkmenu'><?= $row[title]?></a>
+		</TD>
+		<TD>
+			/bbs/bbsList.html?id=<?= $row[id] ?>
+		</TD>
+		<TD> (<font color="E37A08"><?= $toDayCnt ?></font>/<?= $totalCnt ?>)</TD>
+		<TD>
+			<input type='button' value='기능설정' class='but green' onClick="go_modi('<?= $row[id] ?>')">
+			<input type='button' value='삭제' class='but red' onClick="go_del('<?= $row[id] ?>');">
+		</TD>
+	</TR>
+	<? $i++; ?>
+	<? } ?>
+<? if ( $i == 0 ) { ?>
+	<TR class='adminwhite'>
+		<TD colspan='4' align='center'>등록된 게시판이 없습니다</TD>
+	</TR>
+<? } ?>
+</TABLE>
+<TABLE><TR><TD height='10'></TD></TR></TABLE>
+<?
+$sql_ask = "SELECT * FROM goodask";
+$sql_y = "SELECT * FROM goodask WHERE confirm='y' ";
+$sql_n = "SELECT * FROM goodask WHERE confirm='n' ";
+$num_ask = $objdb->sqlNumrows( $sql_ask );
+$num_y = $objdb->sqlNumrows( $sql_y );
+$num_n = $objdb->sqlNumrows( $sql_n );
+?>
+<TABLE><TR><TD height='10'=></TD></TR></TABLE>
+<TABLE width='90%'>
+	<TR>
+		<TD class='subtitle'>게시판 추가</TD>
+	</TR>
+</TABLE>
+<TABLE class='admintbl' width='90%' cellpadding='5'>
+<form method='post' name='bbsForm' target='exeFrame' action='<?= $_SERVER[PHP_SELF] ?>?page=info' onSubmit='return bbs_Form();'>
+<input type='hidden' name='mode' value='reload'>
+	<TR class='adminwhite' align='center'>
+		<TD class='adminleft'>아이디</td>
+		<TD>
+			<input type='text' name='AddId' size='15' maxlength='15' class='imedisabled box' >
+		</TD>
+		<TD class='adminleft'>이름</td>
+		<TD>
+			<input type='text' name='AddName' size='20' maxlength='15' class='box'>
+		</TD>
+		<TD>
+			<input type='submit' value='추가' class='but blue pad5'>
+		</TD>
+	</TR>
+</form>
+</TABLE>
+<!-- <TABLE width='90%'>
+	<TR>
+		<TD class='subtitle'>게시판 분류</td>
+	</TR>
+</TABLE>
+<TABLE width='90%' class='admintbl' cellpadding='7'>
+	<TR class='admintitle'>
+		<TD>게시판 분류 이름</TD>
+		<TD>분류 번호</TD>
+		<TD>기능</TD>
+	</TR>
+<?
+$i = 0;
+$query = "SELECT * FROM bbs_category ORDER BY idx ASC ";
+$result = $objdb->sqlResult( $query );
+while ($row = $objdb->sqlFetch($result)) {
+?>
+	<TR class='adminwhite' align='center'> 
+		<TD><?= $row[name]?></TD>
+		<TD><?= $row[idx] ?></TD>
+		<TD>
+			<input type='button' value='삭제' class='but red' onClick="go_cate_del('<?= $row[idx] ?>');">
+		</TD>
+	</TR>
+<? $i++;?>
+<? } ?>
+<? if ( $i == 0 ) { ?>
+	<TR class='adminwhite' align='center'>
+		<TD colspan='5'>등록된 게시판분류가 없습니다</TD>
+	</TR>
+<? } ?>
+</TABLE>
+<TABLE width='90%'>
+	<TR>
+		<TD class='subtitle'>분류 추가</TD>
+	</TR>
+</TABLE>
+<TABLE class='admintbl' width='90%'  cellpadding='5'>
+<form method='post' name='bbsCate' target='exeFrame' onSubmit='return bbs_Cate();'>
+<input type='hidden' name='mode' value='bbsCate'>
+	<TR class='adminwhite' align='center'>
+		<TD class='adminleft'>분류 이름</TD>
+		<TD>
+			<input type='text' name='bbsName' size='20' maxlength='15' class='box'>
+		</TD>
+		<TD>
+			<input type='submit' value='추가' class='but blue pad5'>
+		</TD>
+	</TR>
+</TABLE>
+</form> -->

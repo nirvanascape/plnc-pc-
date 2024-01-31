@@ -1,0 +1,222 @@
+<?php
+$idx = $_REQUEST['idx'];
+$id = $_REQUEST['id'];
+$PageNo = $_REQUEST['PageNo'];
+?>
+<SCRIPT>
+function commChk(){
+	if(comm.rname.value.length==0){
+		alert("이름을 입력하세요");
+		comm.rname.focus();
+		return false;
+	}
+	else if(comm.rpass.value.length==0){
+		alert("비밀번호을 입력하세요");
+		comm.rpass.focus();
+		return false;
+	}
+	else if(comm.rcomment.value.length==0){
+		alert("내용을 입력하세요");
+		comm.rcomment.focus();
+		return false;
+	}			
+return true;
+}
+function go_list() {
+	self.location = "/admin/bbs/index.html?page=bbslist&id=<?= $id ?>&PageNo=<?= $PageNo ?>";
+}
+function go_reply() {
+	self.location = "/admin/bbs/index.html?page=bbsreply&id=<?= $id ?>&idx=<?= $idx ?>&PageNo=<?= $PageNo ?>";
+}
+function go_del() {
+	if( confirm('삭제하시겠습니까?')){
+		if( confirm('정말 삭제하시겠습니까?'))
+			{
+			self.location = "/admin/bbs/Del_Exe.html?type=bbs&page=bbslist&id=<?= $id ?>&idx=<?= $idx ?>&PageNo=<?= $PageNo ?>"
+			}
+	}
+}
+function go_redel(rid) {
+	if( confirm('삭제하시겠습니까?')){
+			{
+			self.location = "/admin/bbs/Del_Exe.html?page=bbsview&id=<?=$id?>&type=reply&idx=<?=$idx?>&PageNo=<?=$PageNo?>&rid="+rid ;
+			}
+	}
+}
+function go_modi(){
+	self.location = "/admin/bbs/index.html?page=bbsmodify&id=<?=$id?>&idx=<?=$idx?>&type=modi&PageNo=<?=$PageNo?>";
+}
+</SCRIPT>
+<?
+$see_result= mysql_query ("UPDATE bbs SET see=see+1 WHERE idx='".$idx."'");
+$sql = "SELECT * FROM bbs WHERE idx = '".$idx."'";
+$row = $objdb->sqlRow($sql);
+
+$rwdate = substr($row[wdate],0,10);
+$query = "SELECT * FROM bbs_conf WHERE id = '".$id."'";
+$RowConf = $objdb->sqlRow( $query );
+?>
+<TABLE width='90%'>
+	<TR>
+		<TD class='title'><?= $RowConf[title]?> 게시판</TD>
+	</TR>
+</TABLE>
+<TABLE width='710' class='admintbl' cellpadding='5' align='center'>
+	<TR>
+		<TD class='adminleft' width='60'>제목</TD>
+		<TD colspan='5' class='adminwhite'>
+			<?
+			$title = strip_tags($objfunc->str_cut($row[title],50),'<font><b>');
+				if(!$title) $title = "제목없음";
+			?>
+			<?=$title?>
+			&nbsp;<?=(($row[chklock]==y)?'<font color=fdbdbd>(비밀글)</font>':'')?>
+		</TD>
+	</TR>
+	<TR>
+		<TD class='adminleft'>작성자</TD>
+		<TD class='adminwhite'><?=$objfunc->htmlText($row[name])?><?=$row[email]?"(".$row[email].")":""?></TD>
+		<TD class='adminleft' width='60'>작성일</TD>
+		<TD class='adminwhite'><?=$rwdate?></TD>
+		<TD class='adminleft' width='60'>조회</TD>
+		<TD class='adminwhite'><?=$row[see]?></TD>
+		<? $file = $row[clipfile];
+			if($file){?>
+	<TR>
+		<TD class='adminleft' width='60'>청부파일</TD>
+		<TD class='adminwhite alignleft' colspan='5'>
+			<A HREF="/bbs/clipfile/<?=$row[clipfile]?>" target='_blank' class='linkmenu'><img src="/img/common/bbsico_file.gif" border='0'>&nbsp;<?= $row[clipfile] ?></A>
+		</TD>
+	</TR>
+	</TR>
+	<TR>
+		<TD colspan='6' class='adminwhite'>
+		<?
+			$info = $row[clipfile];
+			if((strpos($info,"jpg") || strpos($info,"gif") || strpos($info,"bmp") || strpos($info,"JPG") || strpos($info,"BMP"))){
+				$img_size = getimagesize($_SERVER["DOCUMENT_ROOT"]."/bbs/clipfile/".$info);
+				if($img_size[0] > 670){
+					$width = "670";
+				}else{
+					$width = $img_size[0];
+				}
+			echo make_img('/bbs/clipfile/'.$row[clipfile],  $width);
+			}
+		?>
+		</TD>
+	</TR>
+	<? } ?>
+	<TR>
+		<TD colspan='6' class='adminwhite fix'><?= $objfunc->htmlText( $row[comment], $row[htmlcheck] ) ?></TD>
+	</TR>
+</TABLE>
+<?
+$sql = "SELECT id, name, comment, wdate, pass FROM comment WHERE bid = '".$idx."' ORDER BY wdate DESC ";
+$result = $objdb->sqlResult($sql);
+	if($result) { ?>
+		<!-- 댓글읽기 -->
+		<TABLE><TR><TD></TD></TR></TABLE>
+		<TABLE width='70%' border='0' align='center'>
+			<?
+			while($crow = $objdb->sqlFetch($result)){
+				$rid=$crow[id];
+				$crowPass = $crow[pass];
+			?>
+			<TR>
+				<TD nowrap class="topdotline px11 sp jade"><?=strip_tags($crow[name])?></TD>
+				<TD class="topdotline px11 sp alignleft"><?=strip_tags($crow[comment])?>
+					<font class="verdana lgray">&nbsp;(<?=substr($crow[wdate],0,-3)?>)</font>
+				&nbsp;<img src="/img/common/bbsico_del.gif" hspace="2" class="hand" onClick="javascript:go_redel(<?=$rid?>)">
+				</TD>
+			</TR>
+			<?}?>
+		</TABLE>
+<!-- //댓글읽기 -->
+	<? } ?>
+<!-- 댓글쓰기 -->
+<TABLE border=0 cellpadding=0 cellspacing=0 width='60%' align='center'>
+<form method='post' name='comm' action="comm_Exe.html?id=<?=$id?>&idx=<?=$idx?>&PageNo=<?=$PageNo?>" onsubmit="return commChk()">
+	<TR>
+		<TD class="px11 lgray sp rpad15">댓글</TD>
+		<TD colspan="3">
+			<TEXTAREA NAME="rcomment" ROWS="" COLS="" class="box2" style="width:400px;height:40px"></TEXTAREA>
+		</TD>
+		<TD>
+			<input type="submit" value='입력' class='but'>
+		</TD>
+	</TR>
+</form>
+</TABLE>
+<br>
+<!-- //댓글쓰기 -->
+<!-- //글읽기 -->
+<TABLE align='center'>
+	<TR>
+		<TD>
+			<input type='button' value='답변' class='but pad5' onClick='go_reply();'>
+			<input type='button' value='수정' class='but pad5 orange' onClick='go_modi();'>
+			<input type='button' value='삭제' class='but pad5 red' onClick='go_del();'>
+			<input type='button' value='목록' class='but pad5 blue' onClick='go_list();'>
+		</TD>
+	</TR>
+</TABLE>
+<!-- 테블리스트 -->
+<?
+$thread_start = (ceil($row[thread]/1000)-1)*1000;
+$thread_end = ceil($row[thread]/1000)*1000;
+$sql = "SELECT * FROM bbs WHERE thread <= $thread_end AND thread > $thread_start ORDER BY thread DESC";
+$result = $objdb->sqlResult($sql);
+$rowNum = $objdb->sqlNumrows($sql);
+
+if($rowNum>1) { ?>
+<TABLE width='710' class='admintbl' cellpadding='3' align='center'>
+	<TR class='admintitle'>
+		<TD>번호</TD>
+		<TD>제목</TD>
+		<TD>작성자</TD>
+		<TD>작성일</TD>
+		<TD>조회</TD>
+	</TR>
+<?
+$no = $rowNum;
+while($re_row = $objdb->sqlFetch($result)){
+	$rwdate = substr($row[wdate],0,10);
+	$chk_lock = $row[chklock];
+?>
+	<TR class='adminwhite' align='center'>
+		<TD>
+			<?
+			if($row[idx] == $re_row[idx]){
+				echo "<img src='/img/bbs/arrow.gif'>";
+			}else{
+				echo $no;
+			}
+			?>
+		</TD>
+		<TD class="alignleft">
+			<?for($i=0;$i<$re_row[depth];$i++){?>
+			<?if($i == $re_row[depth]-1){?>
+				<img src="/img/common/bbsico_re.gif" align="absmiddle" hspace="4">
+			<?}else{?>
+				&nbsp;
+			<?}?>
+			<?}?>
+			<A HREF="/admin/bbs/index.html?page=bbsview&id=<?=$id?>&idx=<?=$re_row[idx]?>&PageNo=<?=$PageNo?>">
+			<?
+				$title = strip_tags($objfunc->str_cut($re_row[title],50),'<font><b>');
+				if(!$title) $title = "제목없음";	
+			?>
+			<?=$title?>
+			</A>
+			<?=(($re_row[chklock]==y)?"<img src='/img/common/bbsico_lock.gif' align='absmiddle'>":'')?>
+			<?=(($re_row[clipfile])?"<img src='/img/common/bbsico_file.gif' align='absmiddle'>":'')?>
+			<?=(($re_row[cmt_cnt])?"($row[cmt_cnt])":'')?></TD>
+		<TD class='adminwhite'><?=$objfunc->htmlText($re_row[name])?></font></TD>
+		<TD><?=$rwdate?></TD>
+		<TD><?=$re_row[see]?></TD>
+	</TR>
+	<?
+	$no--;
+	}?>
+</TABLE>
+<?}?>

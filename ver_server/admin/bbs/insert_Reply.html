@@ -1,0 +1,51 @@
+<?php
+session_start();
+include $_SERVER['DOCUMENT_ROOT'].'/common/config.inc.php';
+
+$title = $_REQUEST[title];
+$comment = $_REQUEST[contents];
+$id = $_REQUEST[id];
+$chklock = $_REQUEST[chklock];
+$htmlcheck = $_REQUEST[htmlcheck];
+$PageNo = $_REQUEST[PageNo];
+$idx = $_REQUEST[idx];
+
+$sql_pass = "SELECT pass, chklock FROM bbs WHERE idx='".$idx."' ";
+$row_pass = $objdb->sqlRow( $sql_pass );
+if ( $row_pass[chklock]=='y' ) {
+	$pass = $row_pass[pass];
+} else {
+	$pass = '';
+}
+
+$sql_max = "SELECT max(thread) from BBS";
+$max_thread_fetch = $objdb->sqlRowOne ($max_thread_result);
+$max_thread = ceil($max_thread_fetch/1000)*1000+1000;
+$member_id = 'ad';
+$name = '包府磊';
+
+if(!trim($title)) $title = '臂力格 绝澜';
+if(empty($htmlcheck)) $htmlcheck = 'n';
+
+if ($parent_thread%1000 > 0){
+	$prev_parent_thread = floor($parent_thread/1000)*1000; 
+}else{
+	$prev_parent_thread = $parent_thread - 1000;
+}
+
+$sql = "update bbs set thread=thread-1 where thread > $prev_parent_thread and thread < $parent_thread ";
+$objdb->sqlExe($sql);
+
+if(!empty($_FILES[clipfile][name])){
+	$file_name = ($_FILES[clipfile][name]);
+	$img_dir=$_SERVER["DOCUMENT_ROOT"]."/bbs/clipfile/";
+	$filename = $objfile->uploadFile($_FILES[clipfile][tmp_name], $file_name, $img_dir, true );
+}
+$query = "insert into bbs (thread, depth, title, comment, wdate, see, board_id, clipfile, chklock, htmlcheck, id, name, pass) ";
+$query .= "values ('".($parent_thread-1)."','".($parent_depth+1)."','".$title."','".$comment."' ".
+			", sysdate(),0,'".$id."','".$filename."','".$chklock."', '".$htmlcheck."','".$member_id."','".$name."','".$pass."')";
+$objdb->sqlExe($query);
+?>
+<script>
+	document.location="/admin/bbs/index.html?page=bbslist&id=<?= $id?>&PageNo=<?=$PageNo?>";
+</script>

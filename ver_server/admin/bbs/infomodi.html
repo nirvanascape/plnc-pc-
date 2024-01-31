@@ -1,0 +1,234 @@
+<?php
+$Fsql = "SELECT * FROM bbs_conf WHERE id='".$_REQUEST['id']."' ";
+$Frow = $objdb->sqlRow( $Fsql );
+$save_dir = $_SERVER['DOCUMENT_ROOT']."/upload_img/bbs_img/";
+
+if( $_POST['mode'] == 'reload' ){
+	if( $_FILES["topimg"][tmp_name] ) {
+		$topimg_name = $objfile->imgUploadFile( $_FILES["topimg"][tmp_name], $_FILES["topimg"][name], $save_dir, true);
+		if ($topimg_name){
+				$objfile->deleteFile($save_dir.$Frow[topimg]);
+		}
+	}
+	if( $_FILES["titleimg"][tmp_name] ) {
+		$titleimg_name = $objfile->imgUploadFile( $_FILES["titleimg"][tmp_name], $_FILES["titleimg"][name], $save_dir, true);
+		if ($titleimg_name){
+				$objfile->deleteFile($save_dir.$Frow[titleimg]);
+		}
+	}
+
+	$id = $_POST['id'];
+	$title = $_POST['title'];
+	$chklevel = $_POST['chklevel'];
+	$commt = $_POST['commt'];
+	$read = $_POST['read'];
+	$write = $_POST['write'];
+	$type = $_POST['type'];
+	$chktop = $_POST['chktop'];
+	$chktitle = $_POST['chktitle'];
+	$level_0 = $_POST['level_0'];
+	$level_1 = $_POST['level_1'];
+	$level_2 = $_POST['level_2'];
+	$level_3 = $_POST['level_3'];
+	$level_4 = $_POST['level_4'];
+	$level_5 = $_POST['level_5'];
+	$bbsType = $_POST['bbsType'];
+	if(empty($chklevel))	$chklevel = 'n';
+	if(empty($level_0))	$level_0 = 'n';
+	if(empty($level_1))	$level_1 = 'n';
+	if(empty($level_2))	$level_2 = 'n';
+	if(empty($level_3))	$level_3 = 'n';
+	if(empty($level_4))	$level_4 = 'n';
+	if(empty($level_5))	$level_5 = 'n';
+
+	$query = "UPDATE bbs_conf SET title='".$title."' ".
+			", _write='".$write."', _read='".$read."', _commt='".$commt."', _type='".$type."', chklevel='".$chklevel."' ".
+			", level_0='".$level_0."', level_1='".$level_1."', level_2='".$level_2."', level_3='".$level_3."', level_4='".$level_4."', level_5='".$level_5."', chktop='".$chktop."', chktitle='".$chktitle."', bbs_cate='".$bbsType."'  WHERE id='".$id."' ";
+	$objdb->sqlExe($query);		
+
+	if ( $_FILES["topimg"][tmp_name] ) {
+		$query = "UPDATE bbs_conf SET topimg='".$topimg_name."' WHERE id='".$id."' ";
+		$objdb->sqlExe($query);		
+	} 
+	if ( $_FILES["titleimg"][tmp_name] ) {
+		$query = "UPDATE bbs_conf SET titleimg='".$titleimg_name."' WHERE id='".$id."' ";
+		$objdb->sqlExe($query);		
+	}
+	$objfunc->reloadParent('수정완료');
+}
+?>
+<SCRIPT>
+function go_list() {
+	self.location = "/admin/bbs/index.html?page=info";
+	}
+function modi_chk(form){ 
+	if (form.title.value == '' || form.title.value == null) {
+		alert('이름을 입력하세요');
+		form.title.focus();
+		return false;
+	}
+}
+</SCRIPT>
+<TABLE width='90%'>
+	<TR>
+		<TD class='title'>게시판 설정</TD>
+	</TR>
+</TABLE>
+
+<div class="dotbox">
+<ul>
+	<li>회원 등급 설정시에는 등급에 따른 접근을 제한할 수 있습니다.</li>
+</ul>
+</div>
+
+<TABLE width='90%'>
+	<TR>
+		<TD class='subtitle'>게시판 기능 설정</TD>
+	</TR>
+</TABLE>
+<TABLE width='90%' class='admintbl' cellpadding='7'> 
+	<TR>
+		<TD class='adminleft' width='100'>게시판 이름</TD>
+		<TD class='adminwhite'><?= $Frow[title]?></TD>
+		<TD class='adminleft' width='100'>게시판 아이디</TD>
+		<TD class='adminwhite'><?= $Frow[id]?></TD>
+	</TR>
+</TABLE>
+<TABLE><TR><TD></TD></TR></TABLE>
+<TABLE width='90%' class='admintbl' cellpadding='7'> 
+<form method='post' name='infomodi' target='exeFrame' action="<?= $_SERVER[PHP_SELF] ?>?page=infomodi" ENCTYPE="multipart/form-data" onSubmit='return modi_chk(this)'>
+<input type='hidden' name='mode' value='reload'>
+<input type='hidden' name='id' value='<?= $_REQUEST[id]?>'>
+<?
+$query_cate = "SELECT * FROM bbs_category ORDER BY idx ASC";
+$result_cate = $objdb->sqlResult( $query_cate );
+?>
+	<TR>
+		<TD class='adminleft' width='100'>이름</TD>
+		<TD class='adminwhite'>
+			<input type='text' name='title' class='box' value='<?= $Frow[title] ?>'>
+		</TD>
+	</TR>
+<!-- 	<TR>
+		<TD class='adminleft' width='100'>분류</TD>
+		<TD class='adminwhite'>
+			<select name='bbsType' class='box'>
+				<option value=''>미분류</option>
+			<? while ( $row_cate = $objdb->sqlFetch($result_cate) ) { ?>			
+				<option value='<?= $row_cate[idx]?>' <?= ( $Frow[bbs_cate] == $row_cate[idx]?'selected': '') ?>><?= $row_cate[name]?></option>
+			<? } ?>
+			</select>
+		</TD>
+	</TR> -->
+	<TR>
+		<TD class='adminleft'>회원등급에 따른<br>접근권한 제한</TD>
+		<TD class='adminwhite'>
+			<input type="radio" name="chklevel" value="y" <?if( $Frow['chklevel'] == "y" ) echo "checked";?>>사용합니다.
+			<input type="radio" name="chklevel" value="n" <?if( $Frow['chklevel'] == "n" ) echo "checked";?>>사용하지 않습니다.
+			<br><?=$lspace?>
+			<font class="wine small">- 읽기/쓰기 권한이 아닌 접근 자체를 제한합니다.</font>
+			<br><?=$lspace?>
+<?
+	$sql_level = "SELECT level_0, level_1, level_2, level_3, level_4, level_5 FROM bbs_conf WHERE id='".$_REQUEST[id]."' ";
+	$row = $objdb->sqlRow( $sql_level );
+	$sql = "SELECT level, levelname FROM memberlevel ORDER BY level";
+	$testArr = $objdb->sqlArray( $sql );
+?>
+	<input type='checkbox' name="level_0" value='y' <?if($Frow['level_0'] == 'y'){echo "checked";}?>>미지정
+<?	foreach($testArr as $k => $v){ ?>
+	<input type='checkbox' name="level_<?= $v[level]?>" value='y' <?if($Frow['level_'.$v[level]]=='y'){echo "checked";}?>><?=$v[0]?>등급 - <?=$v[1]?>
+<? } ?>
+			<br><font class="wine small">- 체크된 등급의 접근을 제한합니다.</font>
+		</TD>
+	</TR>
+	<TR>
+		<TD class='adminleft' width='100'>상단 이미지</TD>
+		<TD class='adminwhite'>
+			<input type='radio' name='chktop' value='y' <?= $Frow[chktop]=='y'?'checked':''?>>사용
+			<input type='radio' name='chktop' value='n' <?= $Frow[chktop]=='n'?'checked':''?>>미사용
+		<? if ($Frow['topimg']) {
+			$info =	GetImageSize($_SERVER["DOCUMENT_ROOT"]."/upload_img/bbs_img/".$Frow['topimg']);
+			if($info[0] > 500){
+				$width = 500;
+			} else {
+				$width = $info[0];
+			}
+		?>
+			/ <b>이미지 있음</b>
+			<div><img src="/upload_img/bbs_img/<?= $Frow['topimg'] ?>" width="<?=$width?>"></div>
+		<? } else { ?>
+			/ <b>이미지 없음</b>
+		<? } ?>
+			<input type='file' name='topimg' size='50' class='box'>
+		</TD>
+	</TR>
+	<TR>
+		<TD class='adminleft' width='100'>타이틀 이미지</TD>
+		<TD class='adminwhite alignleft'>
+			<input type='radio' name='chktitle' value='y' <?= $Frow[chktitle]=='y'?'checked':''?>>사용
+			<input type='radio' name='chktitle' value='n' <?= $Frow[chktitle]=='n'?'checked':''?>>미사용
+		<? if ($Frow['titleimg']) {
+			$info =	GetImageSize($_SERVER["DOCUMENT_ROOT"]."/upload_img/bbs_img/".$Frow['titleimg']);
+			if($info[0] > 500) {
+				$width = 500;
+			} else {
+				$width = $info[0];
+			}
+			?>
+			/ <b>이미지 있음</b>
+			<div><img src="/upload_img/bbs_img/<?= $Frow['titleimg'] ?>" width="<?=$width?>"></div>
+		<? } else { ?>
+			/ <b>이미지 없음</b>
+		<? } ?>
+			<input type='file' name='titleimg' size='50' class='box'>
+		</TD>
+	</TR>
+</TABLE>
+<TABLE><TR><TD></TD></TR></TABLE>
+<TABLE width='90%' class='admintbl' cellpadding='7'> 
+	<TR>
+		<TD class='adminleft' width='100'>리스트형식 설정</TD>
+		<TD class='adminwhite'>
+			<INPUT TYPE="radio" NAME="type" value='n' <?= $Frow[_type]=='n'?'checked':''?>>일반게시판
+			<INPUT TYPE="radio" NAME="type" value='i' <?= $Frow[_type]=='i'?'checked':''?>>이미지게시판 <font color='#EE945D'>(답글 입력 불가)</font>
+		</TD>
+	</TR>
+	<TR>
+		<TD class='adminleft' width='100'>쓰기권한 설정</TD>
+		<TD class='adminwhite'>
+			<INPUT TYPE="radio" NAME="write" value='f' <?= $Frow[_write]=='f'?'checked':''?>>방문자 모두에게 쓰기 권한을 허용
+			<br>
+			<INPUT TYPE="radio" NAME="write" value='m' <?= $Frow[_write]=='m'?'checked':''?>>회원에게만 쓰기 권한을 허용
+			<br>
+			<INPUT TYPE="radio" NAME="write" value='a' <?= $Frow[_write]=='a'?'checked':''?>>관리자에게만 쓰기 권한을 허용
+		</TD>
+	</TR>
+	<TR>
+		<TD class='adminleft' width='100'>읽기권한 설정</TD>
+		<TD class='adminwhite'>
+			<INPUT TYPE="radio" NAME="read" value='f' <?= $Frow[_read]=='f'?'checked':''?>>방문자 모두에게 읽기 권한을 허용
+			<br>
+			<INPUT TYPE="radio" NAME="read" value='m' <?= $Frow[_read]=='m'?'checked':''?>>회원에게만 읽기 권한을 허용
+		</TD>
+	</TR>
+	<TR>
+		<TD class='adminleft' width='100'>댓글권한설정</TD>
+		<TD class='adminwhite'>
+			<INPUT TYPE="radio" NAME="commt" value='a' <?= $Frow['_commt']=='a'?'checked':''?>>관리자에게만 쓰기 권한을 허용
+			<br>
+			<INPUT TYPE="radio" NAME="commt" value='m' <?= $Frow['_commt']=='m'?'checked':''?>>회원에게만 댓글 권한을 허용
+			<br>
+			<INPUT TYPE="radio" NAME="commt" value='f' <?= $Frow['_commt']=='f'?'checked':''?>>방문자 모두에게 댓글 권한을 허용
+		</TD>
+	</TR>
+</TABLE>
+<TABLE align='center'>
+	<TR>
+		<TD>
+			<input type='submit' value='확인' class='but pad5 blue'>
+			<input type='reset' value='취소' class='but pad5 gray'>
+			<input type='button' value='목록' class='but pad5 green' onClick='go_list();'>
+		</TD>
+	</TR>
+</form>
+</TABLE>

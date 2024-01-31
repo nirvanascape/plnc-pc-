@@ -1,0 +1,13 @@
+<?php
+include $_SERVER['DOCUMENT_ROOT'].'/common/config.inc.php';
+if( $_REQUEST[type] == 'bbsConf' ) {
+	$query1 = "DELETE FROM bbs_conf WHERE id='".$_REQUEST[id]."'";
+	$query2 = "DELETE FROM bbs WHERE board_id='".$_REQUEST[id]."'";
+	$objdb->sqlExe( $query1 );
+	$objdb->sqlExe( $query2 );
+} else {
+	$query = "DELETE FROM bbs_category WHERE idx='".$_REQUEST[id]."'";
+	$objdb->sqlExe( $query );
+}
+echo "<meta http-equiv='refresh' content=\"0;URL=/admin/bbs/index.html?page=info\">";
+?>

@@ -1,0 +1,88 @@
+<?php
+$PageNo = $_REQUEST['PageNo'];
+$id = $_REQUEST['id'];
+$idx = $_REQUEST['idx'];
+?>
+<SCRIPT LANGUAGE="JavaScript">
+function go_list() {
+	self.location = "/admin/bbs/index.html?page=bbslist&id=<?= $_REQUEST[id]?>&PageNo=<?= $_REQUEST[PageNo]?>";
+	}
+function go_view() {
+	self.location = "/admin/bbs/index.html?page=bbsview&idx=<?= $_REQUEST[idx]?>&id=<?= $_REQUEST[id]?>&PageNo=<?= $_REQUEST[PageNo]?>";
+	}
+function write_chk(write){
+	if(write.title.value == '' || write.title.value == null ){
+		alert('제목을 입력하세요.');
+		write.title.focus();
+		return false;
+	}
+	if(write.comment.value == '' || write.comment.value == null ){
+		alert('내용을 입력하세요.');
+		return false;
+	}
+	if(write.pass.value == '' || write.pass.value == null ){
+		alert('비밀번호를 입력하세요.');
+		write.pass.focus();
+		return false;
+	}
+}
+</SCRIPT>
+<?
+$select_parent = mysql_query("SELECT thread,depth,title,comment,id FROM bbs WHERE idx='".$idx."'");
+$parent_fetch = mysql_fetch_row($select_parent);
+$parent_thread = $parent_fetch[0];
+$parent_depth = $parent_fetch[1];
+$parent_title = $parent_fetch[2];
+//$parent_id = $parent_fetch[3];
+
+$sql_bbs = "SELECT chklock, pass FROM bbs WHERE idx='".$idx."'";
+$result_bbs = $objdb -> sqlResult($sql_bbs);
+$row_bbs = $objdb -> sqlFetch($result_bbs);
+$lock = $row_bbs[chklock];
+$pass = $row_bbs[pass];
+
+$w_sql = "SELECT comment FROM bbs WHERE idx = '".$idx."'";
+$wonRow = $objdb -> sqlRowOne($w_sql);
+$query = "SELECT * FROM bbs_conf WHERE id='".$id."'";
+$RowConf = $objdb->sqlRow( $query );
+?>
+<div class='title'><?= $RowConf[title] ?> 게시판</div>
+<TABLE width='90%' class='admintbl' cellpadding='5' cellspacing='1'>
+<colgroup><col width='100'><col></colgroup>
+<form name='write' action="/admin/bbs/insert_Reply.html?id=<?=$id?>&idx=<?=$idx?>&PageNo=<?=$PageNo?>" method='post' ENCTYPE="multipart/form-data" onSubmit='return write_chk(write)'>
+<input type='hidden' name='parent_depth' value="<?=$parent_depth?>">
+<input type='hidden' name='parent_thread' value="<?=$parent_thread?>">
+<input type='hidden' name='chklock' value="<?=(($lock == y)?'y':'n')?>">
+<!-- <input type="hidden" name="parent_id" value="<?=$parent_id?>"> -->
+<? if ($lock == y){ ?>
+<input type='hidden' name='pass' value="<?=$pass?>">
+<?}?>
+<input type='hidden' name='id' value='<?= $RowConf[id] ?>'>
+	<TR class='adminwhite'>
+		<TD class='adminleft'>제목</TD>
+		<TD>
+			<INPUT TYPE="text" NAME="title" value='<?= $objfunc->htmlText($parent_title)?>' class='box' size='60' maxlength='70'></TD>
+	</TR>
+	<TR class='adminwhite'>
+		<TD class='adminleft' nowrap>첨부파일</TD>
+		<TD>
+			<INPUT TYPE="file" NAME="clipfile" class='box'></TD>
+	</TR>
+	<TR class='adminwhite'>
+		<TD class='adminleft'>내용</TD>
+		<TD>
+			<input type='hidden' name="htmlcheck" value="y">
+			<?
+			include $_SERVER['DOCUMENT_ROOT'].'/common/new_editor/spaw_control.class.php';
+			$sw = new SPAW_Wysiwyg( 'contents', '', '100%', '300px', false, "default"  );
+			$sw->show();
+			?>		
+		</TD>
+	</TR>
+</TABLE>
+<div class="w100 pad15" align="center">
+	<input type='submit' value='확인' class='but pad5 blue'>
+	<input type='reset' value='취소' class='but pad5 red' onClick='go_view();'>
+	<input type='button' value='목록' class='but pad5 green' onClick='go_list();'>
+</div>
+</form>

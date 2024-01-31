@@ -1,0 +1,152 @@
+<?php
+$PageNo = $_REQUEST['PageNo'];
+$qrystring = "&PageSize=$_REQUEST[PageSize]".
+				"&id=$_REQUEST[id]".
+				"&page=$_REQUEST[page]".
+				"&qrystring=$_REQUEST[qrystring]".
+				"&search_word=$_REQUEST[search_word]".
+				"&field=$_REQUEST[field]";
+
+$query = "SELECT * FROM bbs_conf WHERE id='".$_REQUEST[id]."'";
+$RowConf = $objdb->sqlRow( $query );
+
+if ($_GET[field]=="tplusc"){
+	$add_sql = "WHERE board_id='".$_REQUEST[id]."' AND (title LIKE '%" . $_GET[search_word] . "%' OR comment LIKE '%" . $_GET[search_word] . "%')"; 
+}
+elseif ($_GET[search_word]!="" and $_GET[field]!="tplusc"){ $add_sql = " WHERE board_id='".$_REQUEST[id]."' AND $_GET[field] LIKE '%" . $_GET[search_word] . "%' ";
+}
+else $add_sql= "WHERE board_id = '".$_REQUEST[id]."'";
+
+if( empty( $PageSize ) ) $PageSize = 10;
+if( empty( $PageNo ) ) $PageNo = 1;
+$START = $objfunc->getDbStartNo( $PageNo, $PageSize );
+
+$sql = "SELECT * FROM bbs ";
+$sql .= $add_sql;
+$TOTAL = $objdb->sqlNumRows($sql);
+$sql .= " ORDER BY thread DESC LIMIT $START, $PageSize";
+$result = $objdb->sqlResult($sql);
+
+$p_sql = "SELECT COUNT(*) FROM bbs WHERE board_id='".$_REQUEST[id]."'";
+$row_p = $objdb -> sqlRowOne($p_sql);
+?>
+<!-- contents -->
+<script>
+function go_write(){
+	self.location = "/admin/bbs/index.html?page=bbswrite&id=<?=$_REQUEST[id]?>&PageNo=<?=$PageNo?>";
+}
+</script>
+
+<div class='title'><?= $RowConf[title] ?> 게시판</div>
+<!-- 테블리스트 -->
+<TABLE width='90%' align='center'>
+	<TR>
+		<TD class='bold'>총 <font class='red'><?= $row_p ?></font> 글이 있습니다.</TD>
+	</TR>
+</TABLE>
+<TABLE width='700' class='admintbl' cellpadding='7' align='center'>
+<colgroup><col width='30'><col><col width='80'><col width='60'><col width='50'></colgroup>
+	<TR class='admintitle'>
+		<TD>번호</TD>
+		<TD>제목</TD>
+		<TD>작성자</TD>
+		<TD>작성일</TD>
+		<TD>조회</TD>
+	</TR>
+<?
+$no = $TOTAL - $START;
+$dbnewperiod = '24';
+$newdate = date( "Y-m-d H:i:s", mktime( date( 'H' ) - $dbnewperiod, date( 'i' ), date( 's' ), date( 'm' ), date( 'd' ), date( 'Y' ) ) );
+$j = 0;
+while($row = $objdb->sqlFetch($result)){
+	$rwdate = substr($row[wdate],0,10);
+	$chk_lock = $row[chklock];
+	$file_name = $row[clipfile];
+?>
+	<TR class='adminwhite' align='center'>
+		<TD><?=$no?></TD>
+		<TD align='left'>
+		<? for($i=0;$i<$row[depth];$i++) { ?>
+			<? if($i == $row[depth]-1) { ?>
+				<img src="/img/common/bbsico_re.gif" align="absmiddle" hspace="4">
+			<? } else { ?>
+			&nbsp;
+			<? } ?>
+		<? } ?>
+			<A HREF="/admin/bbs/index.html?page=bbsview&idx=<?=$row[idx]?>&id=<?=$_REQUEST[id]?>&PageNo=<?=$PageNo?>" class='linkmenu'>
+		<?=	$title = strip_tags($objfunc->str_cut($row[title],50),'<font><b>');
+			if(!$title) $title = "제목없음"; ?></A>
+		<? if( $row[wdate] > $newdate ) { ?>
+			<img src='/img/common/bbsico_new.gif' align='absmiddle'>
+		<? } ?>
+		<?= (($row[chklock]==y)?"<img src='/img/common/bbsico_lock.gif' align='absmiddle'>":'') ?>
+		<?
+		if ($file_name){
+			if (eregi( ".(jpg|jpeg|jpe|gif|bmp|pcx|pdf|pdp|tif|tiff)$", $file_name ) ){ ?>
+				<img src="/img/common/bbsico_file.gif" align="absmiddle">
+			<?}else{ ?>
+				<img src='/img/common/bbsico_file.gif' align='absmiddle'>
+			<?}
+		}?>
+			<?=(($row[cmt_cnt])?"($row[cmt_cnt])":'')?>
+		</TD>
+		<TD><?=$objfunc->htmlText($row[name])?></TD>
+		<TD><?=$rwdate?></TD>
+		<TD><?=$row[see]?></TD>
+	</TR>
+<?
+$no--;
+$j++;
+}
+if ( $j == 0 ){ ?>
+	<TR class='adminwhite' align='center'>
+		<TD colspan='6'>등록된 글이 없습니다.</TD>
+	</TR>
+<? } ?>
+</TABLE>
+<!-- //테블리스트 -->
+<TABLE border=0 cellpadding=0 cellspacing=0 width="100%" align='center'>
+	<TR align='center'>
+		<TD width="100%">
+
+<TABLE border=0 cellpadding=0 cellspacing=0 >
+	<TR height="40">
+		<TD>
+			<? $objfunc->adminPaging2( $PageNo, $PageSize, $TOTAL, '', $qrystring ) ?>
+		</TD>
+	</TR>
+</TABLE>
+<TABLE >
+	<TR>
+		<TD>
+			<input type='button' value='글쓰기' class='but orange pad5' onClick='go_write();'>
+		</TD>
+	</TR>
+</TABLE>
+<!-- search -->
+<TABLE border=0 cellpadding=5 cellspacing=0>
+<form name='search' method='get' action="<?=$_SERVER["PHP_SELF"]?>">
+	<TR>
+		<TD>
+			<SELECT name='field' class='box'>
+				<OPTION value="title" <?if($_GET[field] == title)echo "selected"?>>제목</option>
+				<OPTION value="comment" <?if($_GET[field] == comment)echo "selected"?>>내용</option>
+				<OPTION value='tplusc' <?if($_GET[field] == tplusc)echo "selected"?>>제목+내용</option>
+				<OPTION value="name" <?if($_GET[field] == name)echo "selected"?>>작성자</option>
+			</SELECT>
+		</TD>
+		<TD style="padding:2px">
+			<input type="text" name="search_word" class="box" style="width:250px" value="<?=$search_word?>"></TD>
+		<TD>
+			<input type="submit" class='but blue pad5' value='검색'>
+		</TD>
+	</TR>
+	<input type='hidden' name='page' value='<?= $_REQUEST[page] ?>'>
+	<input type='hidden' name='id' value='<?= $_REQUEST[id] ?>'>
+</form>
+</TABLE>
+
+		</TD>
+	</TR>
+</TABLE>
+<!-- //search -->

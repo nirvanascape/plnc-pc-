@@ -1,0 +1,112 @@
+<?php
+$idx = $_REQUEST['idx'];
+$id = $_REQUEST['id'];
+$PageNo = $_REQUEST['PageNo'];
+$mode = $_REQUEST['mode'];
+?>
+<SCRIPT LANGUAGE="JavaScript">
+function modi_chk(form){
+	if(form.title.value == '' || form.title.value == null ){
+		alert('제목을 입력하세요.');
+		form.title.focus();
+		return false;
+	}
+	if(form.comment.value == '' || form.comment.value == null ){
+		alert('내용을 입력하세요.');
+		return false;
+	}
+}
+function go_list() {
+	self.location = "/admin/bbs/index.html?page=bbsview&id=<?=$id?>&PageNo=<?=$PageNo?>&idx=<?=$idx?>";
+}
+</SCRIPT>
+<?
+if ( $mode == 'reload' ){
+$title = $_REQUEST['title'];
+$htmlcheck = $_REQUEST['htmlcheck'];
+$comment = $_REQUEST['comment'];
+$chklock = $_REQUEST['chklock'];
+$file = $_REQUEST['file'];
+	
+	if(!trim($title)) $title = '글제목 없음';
+	if(empty($htmlcheck)) $htmlcheck = 'n';
+	if(!empty($_FILES[clipfile][name])){
+		$sql = "SELECT clipfile FROM bbs WHERE idx='".$idx."'";
+		$file = $objdb->sqlRowOne($sql);
+			if($file){
+				$objfile->deleteFile($_SERVER["DOCUMENT_ROOT"].'/bbs/clipfile/'.$file);
+			}
+			$file_name = ($_FILES[clipfile][name]);
+			$img_dir=$_SERVER["DOCUMENT_ROOT"]."/bbs/clipfile/";
+			$filename = $objfile->uploadFile($_FILES[clipfile][tmp_name], $file_name, $img_dir, true );
+			$sql="UPDATE bbs SET title='".$title."', comment='".$comment."', chklock='".$chklock."', clipfile='".$filename."', htmlcheck='".$htmlcheck."' WHERE idx='".$idx."'";
+			$objdb->sqlExe($sql);	
+	}else{
+		$sql = "UPDATE bbs SET title='".$title."', comment='".$comment."', chklock='".$chklock."', htmlcheck='".$htmlcheck."' WHERE idx='".$idx."'";
+		$objdb->sqlExe($sql);	
+	}
+	$url = "/admin/bbs/index.html?page=bbsview&idx=$idx&id=$id&PageNo=$PageNo";
+	$objfunc->goParent($url,'수정완료');
+}
+$sql ="SELECT * FROM bbs WHERE idx = '".$idx."'";
+$row = $objdb->sqlRow($sql);
+$query = "SELECT * FROM bbs_conf WHERE id='".$id."'";
+$RowConf = $objdb->sqlRow( $query );
+$ad_sql = "SELECT email FROM authorised_user";
+$ad_email = $objdb->sqlRowOne( $ad_sql );
+?>
+<div class='title'><?= $RowConf[title] ?> 게시판</div>
+<TABLE width='90%' class='admintbl' cellpadding='5'>
+<form method='post' name='bbsmodi' target='exeFrame' ENCTYPE="multipart/form-data" onSubmit='return modi_chk(this)'>
+<input type='hidden' name='mode' value='reload'>
+	<TR>
+		<TD class="adminleft">이름</TD>
+		<TD class="adminwhite">
+			<?= !$row[name]?'관리자':"$row[name]"?>
+		</TD>
+	</TR>
+	<TR>
+		<TD class="adminleft">이메일</TD>
+		<TD class="adminwhite">
+			<?= !$row[email]?"$ad_email":"$row[email]" ?>
+		</TD>
+	</TR>
+	<TR>
+		<TD class="adminleft" nowrap>첨부파일</TD>
+		<TD class="adminwhite">
+			<INPUT TYPE="file" NAME="clipfile" class="box w98"></TD>
+	</TR>
+	<TR>
+		<TD class="adminleft">제목</TD>
+		<TD class="adminwhite">
+			<INPUT TYPE="text" NAME="title" class="box w98" value="<?=$row[title]?>"></TD>
+	</TR>
+	<TR>
+		<TD class="adminleft">내용</TD>
+		<TD class="adminwhite">
+			<input type='hidden' name="htmlcheck" value="<?=$row[htmlcheck]?>">
+				<?
+				$comment=$row[comment];
+				include $_SERVER['DOCUMENT_ROOT']."/common/new_editor/spaw_control.class.php";
+				$sw = new SPAW_Wysiwyg( 'comment',$comment, '100%', '300px', false, "full" );	
+				$sw->show();
+				?>		
+		</TD>
+	</TR>
+<? if( $row[chklock] != 'y' || $row[depth] == 0 ) {?>
+	<TR>
+		<TD class="adminleft">공개여부</TD>
+		<TD class="adminwhite">
+			<INPUT TYPE="radio" NAME="chklock" value='n' <?=(($row[chklock]==n)?'checked':'')?>>
+				<font class="dgray sp">공개</font>&nbsp;&nbsp;&nbsp;
+			<INPUT TYPE="radio" NAME="chklock" value='y' <?=(($row[chklock]==y)?'checked':'')?>>
+				<font class="dgray sp">비공개</font>(작성자와 관리자만 확인할 수 있습니다.)
+		</TD>
+	</TR>
+<? } ?>
+</TABLE>
+<div align='center' class='pad15'>
+	<input type='submit' value='입력' class='but pad5'>
+	<input type='button' value='취소' class='but pad5' onClick='go_list();'>
+</div>
+</form>

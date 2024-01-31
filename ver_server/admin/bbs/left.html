@@ -1,0 +1,23 @@
+<?php
+include $_SERVER['DOCUMENT_ROOT'].'/common/config.inc.php';
+
+$_LEFTMENU = array(
+	'info' => '게시판 관리',
+	'myform' => '폼 관리'
+	);
+?>
+<!-- MENU_start -->
+<fieldset id='leftField'>
+<legend class='lefttop'><a href='/admin/bbs/' class='linkmenu'><font class='red'>게시판 관리</font></a></legend>
+
+		<TABLE width='100%' border='0' cellspacing='0' cellpadding='0' class="mt10">
+		<? foreach( $_LEFTMENU as $k => $v ){ ?>
+			<TR height='25'>
+				<TD style='padding:0 0 0 10'><a href="/admin/bbs/index.html?page=<?= $k ?>" class='linkmenu'><?= $v ?></a></TD>
+				<TD align='right'><img src='/admin/img/bbsarrow.gif' border='0' hspace='6'></TD>
+			</TR>
+		<? } ?>
+		</TABLE>
+
+</fieldset>
+<!-- MENU_end -->

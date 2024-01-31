@@ -1,0 +1,34 @@
+<?php
+session_start();
+include $_SERVER['DOCUMENT_ROOT'].'/common/config.inc.php';
+
+$title = $_REQUEST[title];
+$contents = $_REQUEST[comment];
+$id = $_REQUEST[id];
+$chklock = $_REQUEST[chklock];
+$htmlcheck = $_REQUEST[htmlcheck];
+$PageNo = $_REQUEST[PageNo];
+
+$sql_max = "SELECT MAX(THREAD) FROM bbs";
+$max_thread_result = mysql_query($sql_max);
+$max_thread_fetch = mysql_fetch_row($max_thread_result);
+$max_thread = ceil($max_thread_fetch[0]/1000)*1000+1000;
+$pass = '';
+$member_id = 'ad';
+$chklock = 'n';
+$name = '包府磊';
+if( !trim($title) )	$title = '臂力格 绝澜';
+if( empty($htmlcheck) ) $htmlcheck = 'n';
+
+if( !empty($_FILES[clipfile][name]) ) {
+	$file_name = ($_FILES[clipfile][name]);
+	$img_dir=$_SERVER["DOCUMENT_ROOT"]."/bbs/clipfile/";
+	$filename = $objfile->uploadFile($_FILES[clipfile][tmp_name], $file_name, $img_dir, true );
+}
+$query = "INSERT INTO bbs (idx, thread, depth, pass, title, comment, wdate, see, board_id, clipfile, chklock, htmlcheck, id,name) ";
+$query .= "VALUES ('','".$max_thread."',0,'".$pass."','".$title."','".$contents."',sysdate(), 0,'".$id."','".$filename."','".$chklock."', '".$htmlcheck."', '".$member_id."','".$name."')";
+$objdb->sqlExe($query);
+?>
+<script>
+	document.location="index.html?page=bbslist&id=<?=$id?>&PageNo=<?=$PageNo?>";
+</script>

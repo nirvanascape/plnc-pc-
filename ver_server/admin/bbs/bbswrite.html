@@ -1,0 +1,58 @@
+<?php
+$PageNo = $_REQUEST['PageNo'];
+$id = $_REQUEST['id'];
+?>
+<SCRIPT LANGUAGE="JavaScript">
+function go_list() {
+	self.location = "/admin/bbs/index.html?page=bbslist&id=<?= $_REQUEST[id]?>&PageNo=<?= $_REQUEST[PageNo]?>";
+	}
+function write_chk(write){
+	if(write.title.value == '' || write.title.value == null ){
+		alert('제목을 입력하세요.');
+		write.title.focus();
+		return false;
+	}
+	if(write.comment.value == '' || write.comment.value == null ){
+		alert('내용을 입력하세요.');
+		return false;
+	}
+}
+</SCRIPT>
+<?
+$query = "SELECT * FROM bbs_conf WHERE id='".$id."'";
+$RowConf = $objdb->sqlRow( $query );
+?>
+<div class='title'><?= $RowConf[title] ?> 게시판</div>
+<TABLE width='90%' class='admintbl' cellpadding='5' cellspacing='1'>
+<colgroup><col width="18%"><col width="82%"></colgroup>
+<form name='write' action="insert.html?id=<?=$id?>&PageNo=<?=$PageNo?>" method='post' ENCTYPE="multipart/form-data" onSubmit='return write_chk(write)'>
+<input type='hidden' name='id' value='<?= $RowConf[id] ?>'>
+<input type='hidden' name="htmlcheck" value="y">
+	<TR class='adminwhite'>
+		<TD class='adminleft'>제목</TD>
+		<TD>
+			<INPUT TYPE="text" NAME="title" class='box' size='60' maxlength='70'>
+		</TD>
+	</TR>
+	<TR class='adminwhite'>
+		<TD class='adminleft' nowrap>첨부파일</TD>
+		<TD>
+			<INPUT TYPE="file" NAME="clipfile" class='box'></TD>
+	</TR>
+	<TR class='adminwhite'>
+		<TD class='adminleft'>내용</TD>
+		<TD>
+			<?
+			include $_SERVER['DOCUMENT_ROOT'].'/common/new_editor/spaw_control.class.php';
+			$sw = new SPAW_Wysiwyg( 'comment', '', '100%', '300px', false, "full"  );
+			$sw->show();
+			?>		
+		</TD>
+	</TR>
+</TABLE>
+<div class="pad15" align="center">
+	<input type='submit' value='확인' class='but pad5 blue'>
+	<input type='reset' value='취소' class='but pad5 red'>
+	<input type='button' value='목록' class='but pad5 green' onClick='go_list();'>
+</div>
+</form>
