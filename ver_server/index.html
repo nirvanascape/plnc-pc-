@@ -1,0 +1,155 @@
+<?php
+include $_SERVER['DOCUMENT_ROOT'].'/common/config.inc.php';
+include $_SERVER["DOCUMENT_ROOT"]."/inc/top2.html";
+include $_SERVER["DOCUMENT_ROOT"]."/common/user_func2.php";
+
+?>
+
+<header>
+    <div class="container container_header cleafix">
+        <h1 class="logo indent">
+            <a href="index.html">Logo</a>
+        </h1>
+        <nav>
+            <ul class="index_menu clearfix">
+                <li><a href="about/about_intro.html">about</a></li>	
+                <li><a href="service/service_intro.html">service</a></li>	
+                <li><a href="/bbs/bbsList2.html?id=notice">customer</a></li>	
+                <li><a href="recruit/recruit_intro.html">recruit</a></li>		
+            </ul>
+        </nav>
+    </div><!--/////common nav/////-->
+    <div class="mainvisual">
+        <ul>
+            <li class="main1">
+                <dl>
+                    <dt class="indent">empty</dt>
+                    <dd><img src="images/typho_dot.png" alt="mainvisual image1"></dd>
+                    <dt>Making people and businesses happy</dt>
+                    <dd>사람과 기업을 행복하게 합니다.</dd>
+                </dl>
+                <div class="visual_wapper">
+                    <div class="visual_dot"></div>
+                    <div class="visual_opacity"></div>
+                    <div class="visual_img"></div>  
+                    <div class="visual_animation01"></div>
+                    <div class="visual_animation02"></div>                    
+                </div>                   
+            </li>
+            <li class="main2">
+                <dl>
+                    <dt class="indent">empty</dt>
+                    <dd><img src="images/typho_dot.png" alt="mainvisual image2"></dd>
+                    <dt>The technology of plnc leading IT</dt>
+                    <dd>plnc의 기술력은 IT 관련 분야를 선도합니다.</dd>
+                </dl>
+                <div class="visual_wapper">
+                    <div class="visual_dot"></div>
+                    <div class="visual_opacity"></div>
+                    <div class="visual_img"></div>
+                    <div class="visual_animation01"></div>
+                    <div class="visual_animation02"></div>                         
+                </div>
+            </li> 
+            <li class="main3">
+                <dl>
+                    <dt class="indent">empty</dt>
+                    <dd><img src="images/typho_dot.png" alt="mainvisual image3"></dd>
+                    <dt>Passion and trust create PLNC</dt>
+                    <dd>열정과 신뢰가 plnc를 만듭니다.</dd>
+                </dl> 
+                <div class="visual_wapper">
+                    <div class="visual_dot"></div>
+                    <div class="visual_opacity"></div>
+                    <div class="visual_img"></div>
+                    <div class="visual_animation"></div>
+                </div>
+            </li>
+        </ul>
+        <div class="btn">
+            <span class="indent active">01</span>
+            <span class="indent">02</span>
+            <span class="indent">03</span>
+            <p class="playbt"></p> 
+        </div>
+        <div class="side_btn">
+            <a href="" class="indent prev">prev</a>
+            <a href="" class="indent next">next</a>
+        </div>
+    </div><!--/////mainvisual/////-->
+</header>
+<section>
+    <div class="main_section claerfix">
+        <div class="main_box">
+			<a href="/service/service_intro.html?tab=01">
+				<div class="mobile_icon"><img src="images/main_icon01.png" alt="mobile icon"></div>
+				<h2 class="tt">모바일 컨설팅</h2>
+				<p>최신의 기술력과 최고의 기획력을<br>통한 모바일 컨설팅</p>
+			</a>
+        </div>
+        <div class="main_box">
+			<a href="/service/service_intro.html?tab=02">
+				<div class="ecms_icon"><img src="images/main_icon02.png" alt="ecms icon"></div>
+				<h2 class="tt"><span>Reference</span></h2>
+				<p>각 분야의 우수한<br>Reference를 소개합니다</p>
+			</a>
+        </div>
+        <div class="main_box">
+          <a href="/service/service_intro.html?tab=03">
+			   <div class="solution_icon"><img src="images/main_icon03.png" alt="solution icon"></div>
+				<h2 class="tt"><span>Enterprise Solution</span></h2>
+				<p>기업에 필요한<br> 최신 기업용 솔루션 제공</p>
+			</a>
+        </div>
+        <div class="main_box">
+			<a href="/service/service_intro.html?tab=04">
+				<div class="customer_icon"><img src="images/main_icon04.png" alt="customer icon"></div>
+				<h2 class="tt">주요 고객사</h2>
+				<p>PLNC는 고객과 함께<br>미래를 개척합니다</p>
+			</a>
+        </div>
+    </div><!--/////main_section/////--> 
+    <div class="main_section_bottom">
+        <div class="container container_footer clearfix">
+          <!-- //notice -->
+				<?
+				$mybbs1 = user_board( 'notice', '4', '45', 'sortno','1', 'help');
+				?>
+			    <div id="Mnews" class="clearfix">
+					<h2 class="tit tte">NOTICE</h2>
+					<div id="showhide_tbl_1">
+						<div class="slideshow-wrapper clearfix slide_bottom" id="slideshow">
+							<dl class="rolling_txt">	
+								<dt class="wrapper-li" rel="0"><? echo $mybbs1[title][1]; ?></dt>
+								<dt class="wrapper-li" rel="1"><? echo $mybbs1[title][2]; ?></dt>
+								<dt class="wrapper-li" rel="2"><? echo $mybbs1[title][3]; ?></dt>
+							</dl>
+						</div>
+					</div>
+                </div>
+            <!-- news -->
+            <?
+            $mybbs1 = user_board( 'news', '4', '45', 'sortno','1', 'help');
+            ?>
+            <div id="Mnews">
+				<h2 class="tit tte">NEWS</h2>
+                <div id="showhide_tbl_2">  
+					<div class="slide_bottom">
+						<dl class="rolling_txt">		
+							<dt><? echo $mybbs1[title][1]; ?></dt>
+							<dt><? echo $mybbs1[title][2]; ?></dt>
+							<dt><? echo $mybbs1[title][3]; ?></dt>
+						</dl>
+					</div>
+                </div>
+            </div>
+            <!-- //news -->
+        </div>
+      
+    </div><!--/////main_section_bottom/////-->
+</section><!--/////section/////-->
+<?
+include $_SERVER["DOCUMENT_ROOT"]."/inc/bottom2.html";
+?>
+  
+

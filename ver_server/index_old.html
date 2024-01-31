@@ -1,0 +1,117 @@
+<?php
+include $_SERVER['DOCUMENT_ROOT'].'/common/config.inc.php';
+include $_SERVER["DOCUMENT_ROOT"]."/inc/top.html";
+include $_SERVER["DOCUMENT_ROOT"]."/common/user_func.php";
+
+#####################################################################
+########################		메인페이지 게시판뿌리기		##########################
+#####################################################################
+
+/*
+include $_SERVER["DOCUMENT_ROOT"]."/common/user_func.php";
+인쿠르드하기
+
+$mybbs1 = user_board( '게시판종류', '불러올 글수', '제목글자수 제한', '정렬방식', '서브넘(subnum)', '메뉴네임(mname)');
+*/
+
+?>
+<meta http-equiv="content-Type" content="text/html;charset=euc-kr">
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+function bobChange(ctype)
+{
+	var tbl_name = '';
+	
+	var t = document.getElementsByTagName("DIV");
+	for( var i=0; i<t.length; i++ ){
+		if( t[i].id.substring(0,12) == 'showhide_tbl' )	t[i].style.display = 'none';
+	}
+
+document.getElementById('showhide_tbl_'+ctype).style.display = "block";
+}
+function subChange(ctype)
+{
+	var distype = (document.getElementById('showhide_tbl_'+ctype).style.display == 'none' ? 'block': 'none');
+	document.getElementById('showhide_tbl_'+ctype).style.display = distype;
+}
+//-->
+</SCRIPT>
+
+<!-- MAIN -->
+<TABLE border="0" cellpadding="0" cellspacing="0" id="MAINimg">
+<TR>
+	<TD><script language="javascript">flash('/img/swf/main_01.swf',960,304,'','transparent','','.')</script></TD>
+</TR>
+<TR>
+	<TD><img src="/img/main/center_bg_t.gif" width="960" height="12"></TD>
+</TR>
+<TR>
+  <TD colspan="2" background="/img/main/center_bg_c.gif"><table border="0" cellspacing="0" cellpadding="0">
+    <tr>
+      <TD style="padding-left:16px">
+		
+		
+		<!-- 공지사항 -->
+		<?
+		$mybbs1 = user_board( 'notice', '4', '45', 'sortno','1', 'help');
+		?>
+		<div id="Mnews">
+		<div id="showhide_tbl_1" style="display:block;">
+			<ul class="tit">
+				<li><img src="/img/main/news_tab01_o.gif" class="hand" onClick="bobChange(1)"></li>
+				<li><img src="/img/main/news_tab02.gif" class="hand" onClick="bobChange(2)"></li>
+			</ul>
+			<dl>		
+				<dt><? echo $mybbs1[title][1]; ?></dt>
+				
+				<dt><? echo $mybbs1[title][2]; ?></dt>
+				
+				<dt><? echo $mybbs1[title][3]; ?></dt>
+				
+			</dl>
+		</div>
+		</div>
+		<!-- //공지사항 -->
+
+		<!-- 보도자료 -->
+		<?
+		$mybbs1 = user_board( 'news', '4', '45', 'sortno','1', 'help');
+		?>
+		<div id="Mnews">
+		<div id="showhide_tbl_2" style="display:none;">
+			<ul class="tit">
+				<li><img src="/img/main/news_tab01.gif" class="hand" onClick="bobChange(1)"></li>
+				<li><img src="/img/main/news_tab02_o.gif" class="hand" onClick="bobChange(2)"></li>
+			</ul>
+			<dl>		
+				<dt><? echo $mybbs1[title][1]; ?></dt>
+				
+				<dt><? echo $mybbs1[title][2]; ?></dt>
+				
+				<dt><? echo $mybbs1[title][3]; ?></dt>
+				
+			</dl>
+		</div>
+		</div>
+		<!-- //보도자료 -->
+      <td><div id="Mgoods"><script language="javascript">flash('/img/swf/center_flash.swf',315,88,'','transparent','','.')</script></div></td>
+      <td><table border="0" cellpadding="0" cellspacing="0" background="/img/main/center_recruit.gif">
+  <tr>
+    <td width="295" height="88"><div class="csban">
+		<A HREF="/bbs/bbsList.html?id=gonggo&mname=recruit&m_num=0&subnum=2"><img src="/img/main/cs_qna.gif"></A>
+		</div></td>
+  </tr>
+</table>
+
+		</td>
+    </tr>
+  </table></TD>
+  </TR>
+</TABLE>
+
+<!-- //MAIN -->
+
+
+<?
+include $_SERVER["DOCUMENT_ROOT"]."/inc/bottom.html";
+?>
