@@ -1,0 +1,149 @@
+<?php
+$sql = "SELECT * FROM authorised_user";
+$row = $objdb->sqlRow( $sql );
+
+$AdName = trim($_POST['AdName']);
+$AdPass = trim($_POST['AdPass']);
+$AdEmail = trim($_POST['AdEmail']);
+$company = trim($_POST['company']);
+$phone = trim($_POST['phone']);
+$fax = trim($_POST['fax']);
+$addr = trim($_POST['addr']);
+$domain = trim($_POST['domain']);
+$id = trim($_POST['id']);
+$com_name = trim($_POST['com_name']);
+$com_num = trim($_POST['com_num']);
+$map = trim($_POST['map']);
+
+if ( isset($_POST['AdName']) && isset($_POST['AdPass']) ) {
+$RealPass = $AdPass;
+$AdminPw = sha1($AdPass.'blue');
+	$query = "UPDATE authorised_user SET name='".$AdName."', password='".$AdminPw."', real_pass='".$RealPass."' ".
+			", email='".$AdEmail."', company='".$company."', phone='".$phone."', fax='".$fax."', addr='".$addr."' ".
+			", domain='".$domain."', id='".$id."', com_name='".$com_name."', com_num='".$com_num."', map='".$map."' ";
+	$objdb->sqlExe($query);
+	$objfunc->reloadParent('수정완료');
+}
+?>
+<SCRIPT>
+	function ChkForm()
+	{
+		var f = document.AdminForm;
+		if( f.AdName.value == '' || f.AdName.value == null )
+		{
+			alert('아이디를 입력하세요');
+			f.AdName.focus();
+			return false;
+		}
+		if( f.AdPass.value == '' || f.AdPass.value == null )
+		{
+			alert('비밀번호를 입력하세요');
+			f.AdPass.focus();
+			return false;
+		}
+		if( f.AdEmail.value == '' || f.AdEmail.value == null )
+		{
+			alert('이메일을 입력하세요');
+			f.AdEmail.focus();
+			return false;
+		}
+	}
+</SCRIPT>
+<TABLE><TR><TD></TD></TR></TABLE>
+<TABLE width='90%'>
+	<TR>
+		<TD class='title'>관리자정보 수정</TD>
+	</TR>
+</TABLE>
+
+<div class="dotbox">
+<ul>
+	<li>사이트 정보에 입력하신 내용이 홈페이지 하단과 찾아오시는 길에 출력됩니다.</li>
+</ul>
+</div>
+
+<TABLE class='admintbl' cellpadding='10' cellspacing='1' width='80%'>
+<form method='post' target='exeFrame' action='<?= $_SERVER["PHP_SELF"] ?>' name='AdminForm' onSubmit='return ChkForm();'>
+	<TR class='adminwhite'>
+		<TD class='adminleft'>아이디</TD>
+		<TD>
+			<input type='text' name='id' maxlength='20' value='<?= $row[id] ?>' class='box'>
+		</TD>
+	</TR>
+	<TR class='adminwhite'>
+		<TD class='adminleft'>비밀번호</TD>
+		<TD class='alignleft'>
+			<input type='password' name='AdPass' maxlength='20' value='<?= $row[real_pass]?>' class='box'>
+		</TD>
+	</TR>
+	<TR class='adminwhite'>
+		<TD class='adminleft'>관리자명</td>
+		<TD>
+			<input type='text' name='AdName' class='box' size='30' value='<?= $row[name] ?>' maxlength='50'>
+		</TD>
+	</TR>
+	<TR class='adminwhite'>
+		<TD class='adminleft'>이메일</td>
+		<TD>
+			<input type='text' name='AdEmail' class='box' size='30' value='<?= $row[email] ?>' maxlength='50'>
+		</TD>
+	</TR>
+	<TR class='adminwhite'>
+		<TD class='adminleft'>회사명</TD>
+		<TD>
+			<input type='text' name='company' class='box' size='30' value='<?= $row[company] ?>' maxlength='50'>
+		</TD>
+	</TR>
+	<TR class='adminwhite'>
+		<TD class='adminleft'>대표자명</TD>
+		<TD>
+			<input type='text' name='com_name' class='box' size='30' value='<?= $row[com_name] ?>' maxlength='50'>
+		</TD>
+	</TR>
+	<TR class='adminwhite'>
+		<TD class='adminleft'>사업자 등록번호</TD>
+		<TD>
+			<input type='text' name='com_num' class='box' size='30' value='<?= $row[com_num] ?>' maxlength='50'>
+		</TD>
+	</TR>
+	<TR class='adminwhite'>
+		<TD class='adminleft'>도메인</TD>
+		<TD>
+			<input type='text' name='domain' class='box' size='30' value='<?= $row[domain] ?>' maxlength='50'>
+		</TD>
+	</TR>
+	<TR class='adminwhite'>
+		<TD class='adminleft'>전화번호</TD>
+		<TD>
+			<input type='text' name='phone' class='box' size='20' value='<?= $row[phone] ?>' maxlength='50'>
+		</TD>
+	</TR>
+	<TR class='adminwhite'>
+		<TD class='adminleft'>팩스번호</TD>
+		<TD>
+			<input type='text' name='fax' class='box' size='20' value='<?= $row[fax] ?>' maxlength='50'>
+		</TD>
+	</TR>
+	<TR class='adminwhite'>
+		<TD class='adminleft'>주소</TD>
+		<TD>
+			<input type='text' name='addr' class='box' size='80' value='<?= $row[addr] ?>' maxlength='50'>
+		</TD>
+	</TR>
+	<TR class='adminwhite'>
+		<TD class='adminleft'>오시는 방법</TD>
+		<TD>
+			<textarea name='map' rows='4' cols='100%' class='box'><?= $row[map]?></textarea>
+		</TD>
+	</TR>
+</TABLE>
+<TABLE><TR><TD></TD></TR></TABLE>
+<TABLE width='90%'>
+	<TR class='adminwhite' align='center'>
+		<TD>
+			<input type='submit' value='수정' class='but blue pad5'>
+			<input type='reset' value='취소' class='but gray pad5'>
+		</TD>
+	</TR>
+</TABLE>
+</form>

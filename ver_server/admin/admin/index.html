@@ -1,0 +1,10 @@
+<?php
+include $_SERVER['DOCUMENT_ROOT'].'/common/admin.inc.php';
+	if ( $_GET[page] ) {
+		$MainPage = $_GET[page].'.html';
+	} else {
+		$MainPage = 'info.html';
+	}			
+$page = new page();
+$page->Display();
+?>

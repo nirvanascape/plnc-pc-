@@ -1,0 +1,62 @@
+<?php
+$sql = "SELECT * FROM member_join";
+$row = $objdb->sqlRow( $sql );
+
+$yak1 = $_POST['yak1'];
+$yak2 = $_POST['yak2'];
+
+if ( $_POST['mode'] == 'reload') {
+	$query = "UPDATE member_join SET yak1='".$yak1."', yak2='".$yak2."' ";
+	$objdb->sqlExe($query);
+	$objfunc->reloadParent('수정완료');
+}
+?>
+<link rel="stylesheet" href="/style.css" type="text/css">
+
+<SCRIPT>
+	function ChkForm() {
+		var f = document.yakForm;
+		if( f.yak1.value == '' || f.yak1.value == null ) {
+			alert('회원이용약관을 입력하세요');
+			f.yak1.focus();
+			return false;
+		}
+		if( f.yak2.value == '' || f.yak2.value == null ) {
+			alert('개인정보 취급방침을 입력하세요');
+			f.yak2.focus();
+			return false;
+		}
+	}
+</SCRIPT>
+
+<form method='post' target='exeFrame' name='yakForm' onSubmit='return ChkForm();'>
+<input type='hidden' name='mode' value='reload'>
+<TABLE width='90%'>
+	<TR>
+		<TD class='title'>회원약관 설정</TD>
+	</TR>
+</TABLE>
+<TABLE><TR><TD height='10'=></TD></TR></TABLE>
+<TABLE width='90%' border='0'>
+	<TR>
+		<TD class='subtitle'>회원 이용약관</TD>
+	</TR>
+</TABLE>
+		<textarea name='yak1' rows='20' cols='135'><?= $row[yak1]?></textarea>
+<TABLE><TR><TD height='10'=></TD></TR></TABLE>
+<TABLE width='90%'>
+	<TR>
+		<TD class='subtitle'>개인정보 취급방침</TD>
+	</TR>
+</TABLE>
+	<textarea name='yak2' rows='20' cols='135'><?= $row[yak2]?></textarea>
+<TABLE><TR><TD height='10'=></TD></TR></TABLE>
+<TABLE width='90%' >
+	<TR class='adminwhite' align='center'>
+		<TD>
+			<input type='submit' value='수정' class='but blue pad5'>
+			<input type='reset' value='취소' class='but gray pad5'>
+		</TD>
+	</TR>
+</TABLE>
+</form>
