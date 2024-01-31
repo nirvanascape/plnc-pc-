@@ -1,0 +1,50 @@
+<?
+include $_SERVER['DOCUMENT_ROOT'].'/inc/menuConfig.inc.php';
+//echo '<'.'?xml version="1.0" encoding="EUC-KR"?'.'>';
+
+//$mname = str_replace('left_', '', basename($_SERVER['PHP_SELF']));
+//$mname = str_replace('.html', '', $mname);
+$mname = "goods";
+?>
+<menu>
+<?
+$cnt=1;
+foreach($menuArr["goods"] as $k => $v){
+		if($v[level] == '1'){
+			if(eregi('\?', $v[url]))	$query_string = "&";
+			else								$query_string = "?";
+			$query_string .= "mname=".$mname."&subnum=".$v[subnum]; 
+if($cnt!=1){
+?>
+</depth1>
+<?}?>
+<depth1 name="<?=$k?>" link="<?=$v[url].$query_string?>" target="" >
+<?
+	$cnt++;
+		}elseif($v[level] == '2'){
+			if(eregi('\?', $v[url]))	$query_string = "&";
+			else								$query_string = "?";
+			$query_string .= "mname=".$mname."&subnum=".$v[subnum]; 
+?>
+<depth2 name="<?=$k?>" link="<?=$v[url].$query_string?>" target="" ></depth2>
+<?
+	}
+}	
+?>
+</depth1>
+</menu>
+
+<!-- <menu>
+<?
+foreach($menuArr[$mname] as $k => $v){
+	if($v[level]=='1'){	
+		if(eregi('\?', $v[url]))	$query_string = "&";
+		else								$query_string = "?";
+		$query_string .= "mname=".$mname."&subnum=".$v[subnum];
+?>
+	<depth1 name="<?=$k?>" link="<?=$v[url].$query_string?>" target="" ></depth1>
+<?
+	}
+}
+?>
+</menu> -->

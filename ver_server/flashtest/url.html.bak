@@ -1,0 +1,47 @@
+<?
+echo '<'.'?xml version="1.0" encoding="EUC-KR"?'.'>';
+?>
+<menu>
+	<!-- 1.회사소개1-->
+	<depth1 name="회사소개" link="../company/page1_11.html" target="" >
+		<depth2 name="CEO인사말" link="../company/page1_11.html" target=""/>    
+		<depth2 name="회사연혁" link="../company/page1_21.html" target=""/>
+		<depth2 name="경영이념" link="../company/page1_31.html" target=""/>
+		<depth2 name="협력업체" link="../company/page1_41.html" target=""/>
+		<depth2 name="오시는길" link="../company/page1_51.html" target=""/>
+	</depth1>
+	
+	<!-- 2.제품안내2 -->
+	<depth1 name="제품안내" link="../product/page2_11.html" target="">
+		<depth2 name="제품소개" link="../product/page2_11.html" target=""/>
+		<depth2 name="제품특장점" link="../product/page2_21.html" target=""/>
+		<depth2 name="제품검색" link="../product/page2_31.html" target=""/>
+		<depth2 name="e-카달로그" link="../product/page2_41.html" target=""/>
+	</depth1>
+	
+	<!-- 3.고객센터3 -->
+	<depth1 name="고객센터" link="../customer/page3_11.html" target="">
+		<depth2 name="고객의 소리" link="../customer/page3_11.html" target=""/>
+		<depth2 name="서비스센터" link="../customer/page3_21.html" target=""/>
+		<depth2 name="묻고답하기" link="../customer/page3_31.html" target=""/>
+		<depth2 name="홍보자료" link="../customer/page3_41.html" target=""/>
+		<depth2 name="광고모음" link="../customer/page3_51.html" target=""/>
+		<depth2 name="오프라인상담" link="../customer/page3_61.html" target=""/>
+	</depth1>
+	
+	<!-- 4.채용안내 -->
+	<depth1 name="채용안내" link="../recruit/page4_11.html" target="">
+		<depth2 name="채용정보" link="../recruit/page4_11.html" target=""/>
+		<depth2 name="인사/복지제도" link="../recruit/page4_21.html" target=""/>
+		<depth2 name="바람직한 인재상" link="../recruit/page4_31.html" target=""/>
+		<depth2 name="채용도우미" link="../recruit/page4_41.html" target=""/>
+		<depth2 name="지원서" link="../recruit/page4_51.html" target=""/>
+	</depth1>
+	
+	<!-- 5.커뮤니티 -->
+	<depth1 name="커뮤니티" link="../community/page5_11.html" target="">
+		<depth2 name="공지사항" link="../community/page5_11.html" target=""/>
+		<depth2 name="자유게시판" link="../community/page5_21.html" target=""/>
+		<depth2 name="이벤트" link="../community/page5_31.html" target=""/>
+	</depth1>
+</menu>

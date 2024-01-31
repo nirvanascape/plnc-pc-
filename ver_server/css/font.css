@@ -1,0 +1,85 @@
+@font-face {
+    font-family: 'Nanum Barun Gothic';
+    font-style: normal;
+    font-weight: 200;
+    src: url('webfont/NanumBarunGothicUltraLight.eot');
+    src: local('Nanum Barun Gothic UltraLight'),
+         local('NanumBarunGothicUltraLight'),
+         url('webfont/NanumBarunGothicUltraLight.eot?#iefix') format('embedded-opentype'),
+         url('webfont/NanumBarunGothicUltraLight.woff2') format('woff2'),
+         url('webfont/NanumBarunGothicUltraLight.woff') format('woff'),
+         url('webfont/NanumBarunGothicUltraLight.ttf') format('truetype');
+  }
+@font-face {
+    font-family: 'Nanum Barun Gothic';
+    font-style: normal;
+    font-weight: 300;
+    src: url('webfont/NanumBarunGothicLight.eot');
+    src: local('Nanum Barun Gothic Light'),
+         local('NanumBarunGothicLight'),
+         url('webfont/NanumBarunGothicLight.eot?#iefix') format('embedded-opentype'),
+         url('webfont/NanumBarunGothicLight.woff2') format('woff2'),
+         url('webfont/NanumBarunGothicLight.woff') format('woff'),
+         url('webfont/NanumBarunGothicLight.ttf') format('truetype');
+  }
+@font-face {
+    font-family: 'Nanum Barun Gothic';
+    font-style: normal;
+    font-weight: 400;
+    src: url('webfont/NanumBarunGothic.eot');
+    src: local('Nanum Barun Gothic'),
+         local('NanumBarunGothic'),
+         url('webfont/NanumBarunGothic.eot?#iefix') format('embedded-opentype'),
+         url('webfont/NanumBarunGothic.woff2') format('woff2'),
+         url('webfont/NanumBarunGothic.woff') format('woff'),
+         url('webfont/NanumBarunGothic.ttf') format('truetype');
+  }
+@font-face {
+    font-family: 'Nanum Barun Gothic';
+    font-style: bold;
+    font-weight: 700;
+    src: url('webfont/NanumBarunGothicBold.eot');
+    src: local('Nanum Barun Gothic Bold'),
+         local('NanumBarunGothicBold'),
+         url('webfont/NanumBarunGothicBold.eot?#iefix') format('embedded-opentype'),
+         url('webfont/NanumBarunGothicBold.woff2') format('woff2'),
+         url('webfont/NanumBarunGothicBold.woff') format('woff'),
+         url('webfont/NanumBarunGothicBold.ttf') format('truetype');
+  }
+@font-face {
+    font-family: 'GothamRnd';
+    font-style: normal;
+    font-weight: 200;
+    src: url('webfont/GothamRnd-Light.eot');
+    src: local('GothamRnd-Light'),
+         url('webfont/GothamRnd-Light.eot?#iefix') format('embedded-opentype'),
+         url('webfont/GothamRnd-Light.woff') format('woff');
+  }
+@font-face {
+    font-family: 'GothamRnd';
+    font-style: normal;
+    font-weight: 300;
+    src: url('webfont/GothamRnd-Book.eot');
+    src: local('GothamRnd-Book'),
+         url('webfont/GothamRnd-Book.eot?#iefix') format('embedded-opentype'),
+         url('webfont/GothamRnd-Book.woff') format('woff');
+  }
+@font-face {
+    font-family: 'GothamRnd';
+    font-style: normal;
+    font-weight: 400;
+    src: url('webfont/GothamRnd-Medium.eot');
+    src: local('GothamRnd-Medium'),
+         url('webfont/GothamRnd-Medium.eot?#iefix') format('embedded-opentype'),
+         url('webfont/GothamRnd-Medium.woff') format('woff');
+  }
+@font-face {
+    font-family: 'GothamRnd';
+    font-style: bold;
+    font-weight: 700;
+    src: url('webfont/GothamRnd-Bold.eot');
+    src: local('GothamRnd-Book'),
+         url('webfont/GothamRnd-Bold.eot?#iefix') format('embedded-opentype'),
+         url('webfont/GothamRnd-Bold.woff') format('woff');
+  }
+  
